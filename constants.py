@@ -1,0 +1,168 @@
+
+
+TOTAL_LINE_W = 150
+
+NIFFY_W = 26*2
+NIFFY_H = 26*2
+
+GAME_STATE_CHOOSE_CHARS = 0
+GAME_STATE_MAIN = 1
+GAME_STATE_ACCESS_INV = 2
+GAME_STATE_PRINT_BIO = 3
+
+ENUM_LOCATION_NIFFY = 0
+ENUM_LOCATION_PLANET = 1
+ENUM_LOCATION_ASTARES = 2
+ENUM_LOCATION_SPACE = 3
+ENUM_LOCATION_BATTLESHIP = 4
+ENUM_LOCATION_NIFFY_SHUTTLE = 5
+ENUM_LOCATION_ESCAPE_POD = 6
+ENUM_LOCATION_RAPTOR = 7
+ENUM_LOCATION_MOON_PALE = 8
+ENUM_LOCATION_PIRATE_SHIP = 9
+ENUM_LOCATION_DERELICT = 10
+ENUM_LOCATION_GARBAGE_FREIGHTER = 11
+ENUM_LOCATION_PLANET_SHUTTLE = 12
+ENUM_LOCATION_MOON_DARK = 13
+ENUM_LOCATION_MOON_RED = 14
+
+ENUM_ROOM_NIFFY_CORRIDOR_BASIC_EAST_WEST = 0
+ENUM_ROOM_NIFFY_STASIS_CHAMBER = 1 #This is where our players start the game. Also can insert badly injured or infected players in here and they will remain safe and ignored by enemies. Requires someone else to open again however.
+ENUM_ROOM_NIFFY_COMMISSARY = 2 #Can find food for free here, or pay for it
+ENUM_ROOM_NIFFY_BARRACKS = 3
+ENUM_ROOM_NIFFY_ARMORY = 4 #Can find weapons for free here
+ENUM_ROOM_NIFFY_SEC_ROOM = 5 #Can lock or open doors from here
+ENUM_ROOM_NIFFY_BRIDGE = 6 #Can use sensors from here to locate enemies throughout the map, and can also direct the ship toward another location in the game, such as the planet, one of its moons, the battleship, etc.
+ENUM_ROOM_NIFFY_ENVIRONMENTAL_CONTROL = 7 #Can vent or pressurize rooms from here, thereby suffocating enemies, fires, and toxic gas
+ENUM_ROOM_NIFFY_AIRLOCK = 8 #Allows access to outside of ship
+ENUM_ROOM_NIFFY_MEDBAY = 9 #Can exchange technology for healing items
+ENUM_ROOM_NIFFY_ENGINE_ROOM = 10 #Powers or unpowers rooms in the game, must be operated to be used.
+ENUM_ROOM_NIFFY_SHUTTLE_BAY = 11 #Can provide win scenario if a certain amount of scrap and/or technology is invested
+ENUM_ROOM_NIFFY_ENGINEERING_BAY = 12 #Can fabricate new items and equipment here
+ENUM_ROOM_NIFFY_CREW_QUARTERS = 13 #Can sleep here at the cost of food to regain some hp and sanity; can only be every 10-20 turns
+ENUM_ROOM_NIFFY_SUPPLY_CLOSET = 14 #Can find free useful items
+ENUM_ROOM_NIFFY_HYDROPONICS_LAB = 15 #Can slowly grow food here
+ENUM_ROOM_NIFFY_OFFICERS_LOUNGE = 16
+ENUM_ROOM_NIFFY_COMMUNICATION_STATION = 17 #Can broadcast for help from here (invites Pirates faster), can also create sounds in powered rooms where there are no characters in order to lure enemies there
+ENUM_ROOM_NIFFY_ARBORETUM = 18 #High concentration of enemies here
+ENUM_ROOM_NIFFY_STORAGE_ROOM = 19 #Can find scrap and tech here
+ENUM_ROOM_NIFFY_LABORATORY = 20 #Can perform experiments on enemies here (dead or alive) to learn about their vulnerabilities.
+ENUM_ROOM_NIFFY_REC_ROOM = 21
+ENUM_ROOM_NIFFY_GROWTH_VATS = 22
+ENUM_ROOM_NIFFY_ROBOTICS_BAY = 23
+ENUM_ROOM_NIFFY_STORAGE_LOCKER = 24 #At the cost of credits, can store items here to retrieve between runs
+ENUM_ROOM_NIFFY_RECYCLER = 25 #Can exchange resources here: scrap, technology and items for credits
+ENUM_ROOM_NIFFY_ASTROMETRICS = 26
+ENUM_ROOM_NIFFY_ANIMAL_LAB = 27
+ENUM_ROOM_NIFFY_READY_ROOM = 28 #Can view upcoming crisis events from here
+ENUM_ROOM_NIFFY_COMPUTER_CORE = 29 #This room has a terminal from which you can remotely OPERATE other rooms, if you pass a science skill test. Characters only have to pass this skill check once until they move again.
+ENUM_ROOM_NIFFY_INTERSECTION = 30 #Like the corridor but contains more doors.
+ENUM_ROOM_NIFFY_CORRIDOR_SR_WEST = 31
+ENUM_ROOM_NIFFY_CORRIDOR_SR_EAST = 32
+ENUM_ROOM_NIFFY_CORRIDOR_BASIC_NORTH_SOUTH = 33
+ENUM_ROOM_VACUUM = -1 #This is what each location grid is initialized to start
+
+ENUM_ITEM_FLASHLIGHT = 0
+ENUM_ITEM_SHOTGUN = 1
+ENUM_ITEM_BALLISTIC_PISTOL = 2
+ENUM_ITEM_LASER_PISTOL = 3
+ENUM_ITEM_SNIPER_RIFLE = 4
+ENUM_ITEM_MOP = 5
+ENUM_ITEM_FIRE_AXE = 6
+ENUM_ITEM_TORQUE_WRENCH = 7
+ENUM_ITEM_SUB_MACHINE_GUN = 8
+ENUM_ITEM_LASER_RIFLE = 9
+ENUM_ITEM_FLAME_THROWER = 10
+ENUM_ITEM_GRENADES = 11
+ENUM_ITEM_ROCKET_LAUNCHER = 12
+ENUM_ITEM_LEAD_PIPE = 13
+ENUM_ITEM_ASSAULT_RIFLE = 14
+ENUM_ITEM_EMP_GRENADES = 15
+ENUM_ITEM_MOTION_DETECTOR = 16
+ENUM_ITEM_MEDKIT = 17
+ENUM_ITEM_NANITE_INJECTOR = 18
+ENUM_ITEM_TASER = 19
+ENUM_ITEM_DNA_TESTER = 20
+ENUM_ITEM_TRICORDER = 21
+ENUM_ITEM_FIRE_EXTINGUISHER = 22
+ENUM_ITEM_SUIT_ENVIRONMENTAL = 23
+ENUM_ITEM_SUIT_MARINE = 24
+ENUM_ITEM_SUIT_VACUUM = 25
+ENUM_ITEM_SHIELD_BELT = 26
+ENUM_ITEM_PRISONER_JUMPSUIT = 27
+ENUM_ITEM_ENGINEER_GARB = 28
+ENUM_ITEM_MEDICAL_SCRUBS = 29
+ENUM_ITEM_SCIENTIST_LABCOAT = 30
+ENUM_ITEM_OFFICER_JUMPSUIT = 31
+ENUM_ITEM_CIVILIAN_JUMPSUIT = 32
+ENUM_ITEM_FLAK_ARMOR = 33
+ENUM_ITEM_ADRENAL_PEN = 34
+ENUM_ITEM_TARGETING_HUD = 35
+ENUM_ITEM_TOTAL_ITEMS = 36
+
+ENUM_CHARACTER_MERCENARY_MECH = 0 #Sec - Comes equipped with built-in hand-flamer, laser, and wrist rockets which use ability points rather than ammunition.
+ENUM_CHARACTER_GAMER = 1 #Survivor - Hacker, gamer, a girl
+ENUM_CHARACTER_ENGINEER = 2 #Engineer - Can interact with engineering bay in useful ways.
+ENUM_CHARACTER_MECH_MAGICIAN = 3 #Engineer - A 'summoner': Can transform scrap into useful droids.
+ENUM_CHARACTER_SCIENTIST = 4 #Scientist
+ENUM_CHARACTER_CRIMINAL = 5 #Survivor; aka 'The Werewolf' - slowly transforms and will eventually turn on the player.
+ENUM_CHARACTER_SERVICE_DROID = 6 #Scientist
+ENUM_CHARACTER_OGRE = 7 #Sec - Tanky melee damage dealer, has
+ENUM_CHARACTER_JANITOR = 8 #Survivor - Comes equipped with a mop (clears various harmful slimes and sludges) and a fire extinguisher, as well as a few key cards. Is otherwise useless.
+ENUM_CHARACTER_PLAYBOY = 9 #Civilian - Is generally useless but a wealthy prince, gives extra completion points if you finish the game with him.
+ENUM_CHARACTER_CEO = 10 #Civilian - Is secretly a traitor?
+ENUM_CHARACTER_BIOLOGIST = 11 #Scientist - Can interact with the laboratory in useful ways
+ENUM_CHARACTER_SOLDIER = 12 #Security - Standard and basic security choice, comes equipped with high quality items but is otherwise not exceptional.
+ENUM_CHARACTER_MAX_CHARS = 13
+
+ENUM_SCAVENGE_RESOURCE_TECH_BASIC = 0
+ENUM_SCAVENGE_RESOURCE_TECH_ADVANCED = 1
+ENUM_SCAVENGE_RESOURCE_FOOD = 2
+ENUM_SCAVENGE_RESOURCE_CREDITS = 3
+ENUM_SCAVENGE_RESOURCE_FUEL_ENGINE = 4
+ENUM_SCAVENGE_RESOURCE_AMMO = 5
+ENUM_SCAVENGE_TOTAL_RESOURCES = 6
+
+ENUM_DOOR_UNLOCKED = 0
+ENUM_DOOR_LOCKED = 1
+ENUM_DOOR_JAMMED = 2
+
+ENUM_FEATURE_NIFFY_SR_PIPE_LEAKY = 0
+ENUM_FEATURE_NIFFY_VALVE_BRONZE_BROKEN = 1
+ENUM_FEATURE_NIFFY_VALVE_STEEL_BROKEN = 2
+ENUM_FEATURE_ALIEN_EGG_SACK = 3
+
+ENUM_HAZARD_GAS_TOXIC = 0
+ENUM_HAZARD_GAS_VACUUM = 1
+ENUM_HAZARD_FIRE = 2
+ENUM_HAZARD_ELECTRIC_CURRENT = 3
+
+ENUM_EQUIP_SLOT_BODY = 0
+ENUM_EQUIP_SLOT_ACCESSORY = 1
+ENUM_EQUIP_SLOT_HANDS = 2
+ENUM_EQUIP_SLOT_TOTAL_SLOTS = 3 #Any element at or beyond this index in the character.inv_list should be considered to be an instance of an item.
+
+ENUM_ITEM_STAT_BOOST_SECURITY = 0
+ENUM_ITEM_STAT_BOOST_ENGINEERING = 1
+ENUM_ITEM_STAT_BOOST_SCIENCE = 2
+ENUM_ITEM_STAT_BOOST_STEALTH = 3
+ENUM_ITEM_STAT_BOOST_STRENGTH = 4
+ENUM_ITEM_STAT_BOOST_WISDOM = 5
+ENUM_ITEM_STAT_BOOST_INTELLIGENCE = 6
+ENUM_ITEM_STAT_BOOST_DEXTERITY = 7
+ENUM_ITEM_STAT_BOOST_ACCURACY = 8
+ENUM_ITEM_STAT_BOOST_HP = 9
+ENUM_ITEM_STAT_BOOST_SANITY = 10
+ENUM_ITEM_STAT_BOOST_ACTION_POINTS = 11
+ENUM_ITEM_STAT_BOOST_ABILITY_POINTS = 12
+ENUM_ITEM_STAT_BOOST_SCAVENGING = 13
+ENUM_ITEM_STAT_BOOST_ARMOR = 14
+ENUM_ITEM_STAT_BOOST_EVASION = 15
+ENUM_ITEM_STAT_BOOST_FIRE_RES = 16
+ENUM_ITEM_STAT_BOOST_GAS_RES = 17
+ENUM_ITEM_STAT_BOOST_VACUUM_RES = 18
+ENUM_ITEM_STAT_BOOST_ELECTRIC_RES = 19
+ENUM_ITEM_STAT_BOOST_TOTAL_STATS = 20
+
+
+
