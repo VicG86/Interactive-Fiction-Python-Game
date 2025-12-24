@@ -1,7 +1,6 @@
 
 from constants import *
 from models.item import Item
-from models.character import Character
 
 from collections import Counter
 import random
@@ -180,7 +179,6 @@ class Room:
         print(output_str)
 
         # Delete the list but keep the variable
-        del self.scavenge_resource_list
         self.scavenge_resource_list = -1
         self.scavenge_resource_list = []
         # Initialize:
@@ -200,34 +198,6 @@ class Room:
 
         if item_found:
             print(items_found_str)
-
-    def add_or_remove_char_to_room_list(self,char_id,add_boolean):
-        if isinstance(char_id, Character):
-            #Find array to use:
-            if char_id.char_team_enum == ENUM_CHAR_TEAM_PC:
-                if not isinstance(self.pcs_in_room_list, list):
-                    self.pcs_in_room_list = []
-                ar_to_use = self.pcs_in_room_list
-            elif char_id.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
-                if not isinstance(self.enemies_in_room_list, list):
-                    self.enemies_in_room_list = []
-                ar_to_use = self.enemies_in_room_list
-            else:
-                if not isinstance(self.neutrals_in_room_list, list):
-                    self.neutrals_in_room_list = []
-                ar_to_use = self.neutrals_in_room_list
-
-            #Append to end of list:
-            if add_boolean:
-                ar_to_use.append(char_id)
-
-            #Del element position from list:
-            else:
-                for i in range(0,len(ar_to_use)):
-                    if isinstance(ar_to_use[i], Character) and ar_to_use[i] == char_id:
-                        del ar_to_use[i]
-        else:
-            print(f"A non-character object was fed to the method add_chars_to_room_list for room with name: {self.room_name}")
 
     def print_char_list(self,char_team_enum):
         if char_team_enum == ENUM_CHAR_TEAM_PC:

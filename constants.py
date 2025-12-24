@@ -70,7 +70,7 @@ ENUM_ROOM_VACUUM = -1 #This is what each location grid is initialized to start
 
 ENUM_ITEM_FLASHLIGHT = 0
 ENUM_ITEM_SHOTGUN = 1
-ENUM_ITEM_BALLISTIC_PISTOL = 2
+ENUM_ITEM_REVOLVER = 2
 ENUM_ITEM_LASER_PISTOL = 3
 ENUM_ITEM_SNIPER_RIFLE = 4
 ENUM_ITEM_MOP = 5
@@ -110,17 +110,26 @@ ENUM_ITEM_RIOT_SHIELD = 38
 ENUM_ITEM_FLAK_SHIELD = 39
 ENUM_ITEM_PHASE_SHIELD = 40
 ENUM_ITEM_PLASMA_TORCH = 41 #Doubles as a decent melee weapon
+
 ENUM_ITEM_FISTS_CHILD = 42
 ENUM_ITEM_FISTS_ADULT = 43
 ENUM_ITEM_FISTS_GIANT = 44
 
-ENUM_ITEM_STEEL_CLUB = 42 #Can only be obtained by manufacturing; probably won't implement
-ENUM_ITEM_STEEL_SPEAR = 43 #Can only be obtained by manufacturing; probably won't implement
-ENUM_ITEM_STEEL_SWORD = 44 #Can only be obtained by manufacturing; probably won't implement
+ENUM_ITEM_SPINE_PROJECTILE = 45
+ENUM_ITEM_SPINE_PROJECTILE_VENOMOUS = 46
+ENUM_ITEM_LARVA_INJECTION_BARB = 47 #Causes infection
+ENUM_ITEM_LARVA_WRITHING_TENDRIL = 48
+ENUM_ITEM_MONSTROUS_CLAW = 49
 
-ENUM_ITEM_KIRAS_NOISY_GAME = 45 #Can be triggered and then dropped; it causes enemies in adjacent rooms to come flocking toward it, potentially breaking down doors to do so.
+ENUM_ITEM_KIRAS_NOISY_GAME = 50 #Can be triggered and then dropped; it causes enemies in adjacent rooms to come flocking toward it, potentially breaking down doors to do so.
+ENUM_ITEM_MACHINE_PISTOL = 51
 
-ENUM_ITEM_TOTAL_ITEMS = 46
+ENUM_ITEM_ACID_SPIT = 52
+ENUM_ITEM_ACID_CLOUD = 53
+ENUM_ITEM_SPINE_PROJECTILE_INFECTED = 54
+ENUM_ITEM_ACID_SACK = 55
+
+ENUM_ITEM_TOTAL_ITEMS = 56
 
 ENUM_CHARACTER_MERCENARY_MECH = 0 #Sec - Comes equipped with built-in hand-flamer, laser, and wrist rockets which use ability points rather than ammunition.
 ENUM_CHARACTER_GAMER = 1 #Survivor - Hacker, gamer, a girl; only character that is small enough to use vents. Is better at hiding than other characters.
@@ -135,6 +144,7 @@ ENUM_CHARACTER_PLAYBOY = 9 #Civilian - Is generally useless but a wealthy prince
 ENUM_CHARACTER_CEO = 10 #Civilian - Is secretly a traitor?
 ENUM_CHARACTER_BIOLOGIST = 11 #Scientist - Can interact with the laboratory in useful ways
 ENUM_CHARACTER_SOLDIER = 12 #Security - Standard and basic security choice, comes equipped with high quality items but is otherwise not exceptional.
+
 ENUM_CHARACTER_ENEMY_SKITTERING_LARVA = 13
 ENUM_CHARACTER_ENEMY_SPINED_SPITTER = 14
 ENUM_CHARACTER_ENEMY_LUMBERING_MAULER = 15
@@ -143,8 +153,12 @@ ENUM_CHARACTER_ENEMY_TRANSMOGRIFIED_SOLDIER = 17
 ENUM_CHARACTER_ENEMY_TRANSMOGRIFIED_SCIENTIST = 18
 ENUM_CHARACTER_ENEMY_TRANSMOGRIFIED_ENGINEER = 19
 ENUM_CHARACTER_ENEMY_TRANSMOGRIFIED_OFFICER = 20
+
 ENUM_CHARACTER_NEUTRAL_INFECTED_SCIENTIST = 21
-ENUM_CHARACTER_MAX_CHARS = 22
+
+ENUM_CHARACTER_ENEMY_SODDEN_SHAMBLER = 22
+
+ENUM_CHARACTER_MAX_CHARS = 23
 
 ENUM_SCAVENGE_RESOURCE_TECH_BASIC = 0
 ENUM_SCAVENGE_RESOURCE_TECH_ADVANCED = 1

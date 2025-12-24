@@ -1,6 +1,7 @@
 
 from constants import *
 from models.item import Item
+from models.room import Room
 
 import random
 import textwrap
@@ -8,7 +9,10 @@ import textwrap
 class Character:
 
     # region Constructor event for character stats:
-    def __init__(self, char_type_enum, spawn_grid_x, spawn_grid_y, spawn_grid, char_team_enum):
+    def __init__(self, char_type_enum, spawn_grid_x, spawn_grid_y, spawn_grid, char_team_enum,add_to_room_list_boolean = True):
+
+        self.add_to_room_list_boolean = add_to_room_list_boolean
+        self.spawned_room_id = spawn_grid[spawn_grid_y][spawn_grid_x]
 
         # Default values for instance vars for this particularly character:
         self.strength = 0
@@ -70,6 +74,9 @@ class Character:
         self.cur_grid_x = spawn_grid_x
         self.cur_grid_y = spawn_grid_y
 
+        self.dodge_bonus_boolean = False
+
+        #region Define char stats....
         if char_type_enum == ENUM_CHARACTER_OGRE:
 
             self.name = "Cragos, 'The Ogre'"
@@ -94,16 +101,24 @@ class Character:
 
             self.armor = 1
 
+            self.starting_combat_rank = ENUM_RANK_ENEMY_NEAR #debug only
+
             self.accuracy = ENUM_AVERAGE_ACCURACY_SCORE-2 #Worse than average accuracy, only hits about 50% of the time, on average
             self.evasion = ENUM_AVERAGE_EVASION_SCORE-1 #Worse than average evasion
 
             # Starting equipment:
-            # item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
-            # self.equip_item(item_to_equip,item_to_equip.equip_slot_enum,True)
             item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
             self.equip_item(item_to_equip, -1, True)
-            item_to_equip = Item(ENUM_ITEM_SHOTGUN)
+            item_to_equip = Item(ENUM_ITEM_POLICE_TRUNCHEON)
             self.equip_item(item_to_equip, -1, True)
+            item_to_equip = Item(ENUM_ITEM_MACHINE_PISTOL)
+            self.equip_item(item_to_equip, -1, True)
+            item_to_equip = Item(ENUM_ITEM_SHOTGUN)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_POLICE_TRUNCHEON)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_RIOT_SHIELD)
+            self.add_item_to_backpack(item_to_equip, True)
 
         elif char_type_enum == ENUM_CHARACTER_BIOLOGIST:
             self.name = "Chavrita, 'The Biologist'"
@@ -248,11 +263,22 @@ class Character:
             self.res_gas = 50
             self.res_electric = -50
 
+            #debug only:
+            self.starting_combat_rank = ENUM_RANK_PC_NEAR  # debug only
+
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
             self.equip_item(item_to_equip, -1,True)
+            item_to_equip = Item(ENUM_ITEM_LASER_PISTOL)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_REVOLVER)
+            self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_FLAME_THROWER)
-            self.equip_item(item_to_equip, -1, True)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_ASSAULT_RIFLE)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_FLAME_THROWER)
+            self.equip_item(item_to_equip, -1,True)
 
         elif char_type_enum == ENUM_CHARACTER_SOLDIER:
             self.name = "Cooper, 'The Security Guard'"
@@ -275,14 +301,20 @@ class Character:
             self.dexterity = 2
             self.speed = 2
 
+            self.starting_combat_rank = ENUM_RANK_PC_NEAR  # debug only
+
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_FLAK_ARMOR)
             self.equip_item(item_to_equip, -1,True)
-            item_to_equip = Item(ENUM_ITEM_ASSAULT_RIFLE)
+            item_to_equip = Item(ENUM_ITEM_MACHINE_PISTOL)
             self.equip_item(item_to_equip, -1,True)
+            item_to_equip = Item(ENUM_ITEM_FIRE_AXE)
+            self.equip_item(item_to_equip, -1, True)
+            item_to_equip = Item(ENUM_ITEM_ASSAULT_RIFLE)
+            self.add_item_to_backpack(item_to_equip ,True)
             item_to_equip = Item(ENUM_ITEM_TARGETING_HUD)
             self.equip_item(item_to_equip, -1, True)
-            item_to_equip = Item(ENUM_ITEM_BALLISTIC_PISTOL)
+            item_to_equip = Item(ENUM_ITEM_REVOLVER)
             self.add_item_to_backpack(item_to_equip ,True)
             item_to_equip = Item(ENUM_ITEM_STUN_BATON)
             self.add_item_to_backpack(item_to_equip ,True)
@@ -293,10 +325,12 @@ class Character:
             item_to_equip = Item(ENUM_ITEM_POLICE_TRUNCHEON)
             self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_RIOT_SHIELD)
+            self.equip_item(item_to_equip, -1,True)
             self.add_item_to_backpack(item_to_equip, True)
-            item_to_equip = Item(ENUM_ITEM_MEDKIT)
             self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_GRENADES)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_LASER_RIFLE)
             self.add_item_to_backpack(item_to_equip, True)
 
         elif char_type_enum == ENUM_CHARACTER_SCIENTIST:
@@ -498,8 +532,11 @@ class Character:
             self.res_vacuum = 100
             self.res_gas = 100
             self.res_electric = 0
-
+            #debug:
             self.starting_combat_rank = ENUM_RANK_ENEMY_NEAR
+            #abilities
+            self.add_ability(ENUM_ITEM_LARVA_INJECTION_BARB)
+            self.add_ability(ENUM_ITEM_LARVA_WRITHING_TENDRIL)
 
         elif char_type_enum == ENUM_CHARACTER_ENEMY_LUMBERING_MAULER:
             self.name = "Lumbering Mauler"
@@ -518,8 +555,10 @@ class Character:
             self.res_electric = 0
 
             self.speed = -1
-
+            #debug:
             self.starting_combat_rank = ENUM_RANK_ENEMY_MIDDLE
+            # abilities
+            self.add_ability(ENUM_ITEM_MONSTROUS_CLAW)
 
         elif char_type_enum == ENUM_CHARACTER_ENEMY_SPINED_SPITTER:
             self.name = "Spined Spitter"
@@ -538,8 +577,40 @@ class Character:
             self.res_electric = 0
 
             self.speed = 3
-
+            #debug:
             self.starting_combat_rank = ENUM_RANK_ENEMY_FAR
+            # abilities
+            self.add_ability(ENUM_ITEM_SPINE_PROJECTILE)
+            #self.add_ability(ENUM_ITEM_SPINE_PROJECTILE_VENOMOUS)
+            #self.add_ability(ENUM_ITEM_SPINE_PROJECTILE_INFECTED)
+
+        elif char_type_enum == ENUM_CHARACTER_ENEMY_SODDEN_SHAMBLER:
+            self.name = "Sodden Shambler"
+            self.hp_max = 7
+            self.hp_cur = 7
+            self.ability_points_cur = 3
+            self.ability_points_max = 3
+            self.sanity_cur = 20
+            self.sanity_max = 20
+
+            self.armor = 0
+            self.evasion = 0
+            self.res_fire = 0
+            self.res_vacuum = 100
+            self.res_gas = 100
+            self.res_electric = 0
+
+            self.speed = 0
+            #debug:
+            self.starting_combat_rank = ENUM_RANK_ENEMY_FAR
+            self.add_ability(ENUM_ITEM_ACID_SPIT)
+            self.add_ability(ENUM_ITEM_ACID_CLOUD)
+
+        #endregion for define char stats
+
+        #Call our method add_or_remove_char_from_room_list to add this char to the appropriate room list:
+        if self.add_to_room_list_boolean:
+            self.add_or_remove_char_from_room_list(self.spawned_room_id,True)
 
     # endregion
 
@@ -583,7 +654,15 @@ class Character:
             ("Or 'D{ITEM NUMBER} to drop the item back into your current room (you could retrieve it again with 'SCAVENGE').")
         print("Enter your selection now >")
 
-    #item_index: indicates which BACKPACK SLOT this item should be removed from (-1 works fine when equipping starting kit); item_inst_id: indicates the item being equipped.
+    #Note: most abilities are just items at this point
+    def add_ability(self,item_enum):
+        if isinstance(self.ability_list, list):
+            self.ability_list.append(Item(item_enum))
+        else:
+            self.ability_list = []
+            self.ability_list.append(Item(item_enum))
+
+    #equip_item: item_index: indicates which BACKPACK SLOT this item should be removed from (-1 works fine when equipping starting kit); item_inst_id: indicates the item being equipped.
     def equip_item(self ,item_inst_id, item_index ,starting_equip_boolean = False):
         if isinstance(item_inst_id.equip_slot_list,list):
             #Iterate through equip_slot_list, matching with corresponding empty positions in the self.inv_list;
@@ -816,8 +895,7 @@ class Character:
                         #If we iterate through this list and the last corresponding item_equip_slot on the char_inv_list
                         #is still == -1, then this is a valid equip, we can return true now:
                         elif self.inv_list[item_equip_slot] == -1 and nested_i == len(item_id_to_equip.equip_slot_list[i])-1:
-                            print(
-                                "Debug only: check_valid_item_equip returning TRUE for a two-handed item.")
+                            #print("Debug only: check_valid_item_equip returning TRUE for a two-handed item.")
                             return True
 
                 if invalid_equip_found:
@@ -827,7 +905,7 @@ class Character:
                 # char inv_list are empty, return TRUE
                 item_equip_slot = item_id_to_equip.equip_slot_list[i]
                 if self.inv_list[item_equip_slot] == -1:
-                    print("Debug only: check_valid_item_equip returning TRUE for one-handed item, body item, or accessory item.")
+                    #print("Debug only: check_valid_item_equip returning TRUE for one-handed item, body item, or accessory item.")
                     return True
         else: #Else: It must therefore == -1
             print(f"The {item_id_to_equip.item_name} is not an item that can be equipped.")
@@ -836,3 +914,32 @@ class Character:
         #print(f"check_valid_item_equip method for char_inst {self.name}, for item name: {item_id_to_equip.item_name}, none of our conditions executed, something likely went wrong, returning False.")
         print(f"Can't equip the {item_id_to_equip.item_name}--make sure that the corresponding equipment slot is free.")
         return False
+
+    def add_or_remove_char_from_room_list(self,room_id,add_boolean):
+
+        if isinstance(room_id, Room):
+            #Find array to use:
+            if self.char_team_enum == ENUM_CHAR_TEAM_PC:
+                if not isinstance(room_id.pcs_in_room_list, list):
+                    room_id.pcs_in_room_list = []
+                ar_to_use = room_id.pcs_in_room_list
+            elif self.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                if not isinstance(room_id.enemies_in_room_list, list):
+                    room_id.enemies_in_room_list = []
+                ar_to_use = room_id.enemies_in_room_list
+            elif self.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL:
+                if not isinstance(room_id.neutrals_in_room_list, list):
+                    room_id.neutrals_in_room_list = []
+                ar_to_use = room_id.neutrals_in_room_list
+
+            #Append to end of list:
+            if add_boolean:
+                ar_to_use.append(self)
+
+            #Del element position from list:
+            else:
+                for i in range(0,len(ar_to_use)):
+                    if isinstance(ar_to_use[i], Character) and ar_to_use[i] == self:
+                        del ar_to_use[i]
+        else:
+            print(f"A non-Room object was fed to the method add_chars_to_room_list for Char with name: {self.name}")

@@ -21,6 +21,7 @@ if __name__ == '__main__':
     print_room_recap = True
     choose_weapon_boolean = False
     choose_ability_boolean = False
+    access_inv_from_combat_boolean = False
 
     cur_char = -1
     cur_char_index = 0
@@ -60,7 +61,7 @@ if __name__ == '__main__':
 
     #endregion
 
-    # region Manually build our location grid for the niffy location:
+    # region Manually build our location grid for the niffy location AND add debug enemies:
 
     # location grid:
     location_grid_niffy = [[0 for _ in range(NIFFY_W)] for _ in range(NIFFY_H)]
@@ -80,38 +81,27 @@ if __name__ == '__main__':
         # char_type_enum, spawn_grid_x, spawn_grid_y, spawn_grid, char_team_enum
     debug_chars = True
     if debug_chars:
-        ammo_total += 20
+        ammo_total += 5
         for i in range(0,1):
             neutral_char_list.append(Character(ENUM_CHARACTER_NEUTRAL_INFECTED_SCIENTIST,origin_grid_x,origin_grid_y,location_grid_niffy,
                                                ENUM_CHAR_TEAM_NEUTRAL))
-            location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(neutral_char_list[len(neutral_char_list)-1],True)
-
-        for i in range(0,random.randint(3,6)):
-
+        for i in range(0,random.randint(3,6)): #3,6
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SKITTERING_LARVA, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY))
-
-            location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(
-                enemy_char_list[len(enemy_char_list) - 1], True)
-
-        for i in range(0, random.randint(1, 4)):
-
+        for i in range(0, random.randint(1, 6)): #1,4
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_LUMBERING_MAULER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY))
-
-            location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(
-                enemy_char_list[len(enemy_char_list) - 1], True)
-
-        for i in range(0, random.randint(1, 3)):
-
+        for i in range(0, random.randint(1, 6)): #1,3
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SPINED_SPITTER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY))
+        for i in range(0, random.randint(1, 6)): #1,3
+            enemy_char_list.append(
+                Character(ENUM_CHARACTER_ENEMY_SODDEN_SHAMBLER, origin_grid_x, origin_grid_y, location_grid_niffy,
+                          ENUM_CHAR_TEAM_ENEMY))
 
-            location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(
-                enemy_char_list[len(enemy_char_list) - 1], True)
     #endregion
 
     # endregion
@@ -119,7 +109,7 @@ if __name__ == '__main__':
     #region Create a temporary copy of each character, use their stats to fill a print list for convenience:
 
     for i in range(0,ENUM_CHARACTER_SOLDIER+1): #ENUM_CHARACTER_SOLDIER is our last pc character
-        temp_pc_char = Character(i,0,0,location_grid_niffy,ENUM_CHAR_TEAM_PC)
+        temp_pc_char = Character(i,0,0,location_grid_niffy,ENUM_CHAR_TEAM_PC,False)
         primary_role_str = "Undefined"
         char_class_snippet = "Undefined"
         #Now define total_chars_bio_list:
@@ -272,7 +262,7 @@ if __name__ == '__main__':
                     #Remove from list:
                     removed_char_inst = pc_char_list.pop()
                     #Remove from corresponding team list in room obj:
-                    location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(removed_char_inst,False)
+                    removed_char_inst.add_or_remove_char_from_room_list(location_grid_niffy[removed_char_inst.cur_grid_y][removed_char_inst.cur_grid_x],False)
                     print(f"{removed_char_inst.name} has been removed from the party.")
                     print("")
                     del removed_char_inst
@@ -315,8 +305,6 @@ if __name__ == '__main__':
                     else:
                         #Add to chosen_pc_chars_list, then check start condition
                         pc_char_list.append(Character(int_char,origin_grid_x,origin_grid_y,location_grid_niffy,ENUM_CHAR_TEAM_PC)) #instantiate char
-                        #Also add to corresponding room char list:
-                        location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(pc_char_list[len(pc_char_list)-1], True)
                         print(f"You have added {pc_char_list[len(pc_char_list)-1].name} to the party.")
                         print("")
                         if len(pc_char_list) == 3:
@@ -365,10 +353,12 @@ if __name__ == '__main__':
                 cur_combat_room_id =  occupying_grid_id[pc_inst.cur_grid_y][pc_inst.cur_grid_x]
                 if isinstance(cur_combat_room_id.enemies_in_room_list,list) and len(cur_combat_room_id.enemies_in_room_list) > 0:
                     if pc_inst.participated_in_new_turn_battle == False:
-                        print(f"There are enemies in the {cur_combat_room_id.room_name} that have discovered {pc_inst.name}! You have no choice now--you have to fight to save yourself!\n")
+                        combat_discovery_str = wrap_str(f"There are enemies in the {cur_combat_room_id.room_name} that have discovered {pc_inst.name}! You have no choice now--you have to fight to save yourself!",TOTAL_LINE_W,False)
+                        print(combat_discovery_str+"\n")
                         #Setup combat_initiative_list:
                         combat_initiative_list = -1
                         combat_initiative_list = []
+                        # This ALSO sets Character.participated_in_new_turn_battle == TRUE!
                         combat_initiative_list = fill_combat_initiative_list(cur_combat_room_id)
                         #Organize by speed + random_int(0,6)
                         combat_initiative_list = organize_initiative_list(combat_initiative_list)
@@ -392,6 +382,7 @@ if __name__ == '__main__':
                             cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
                         cur_combat_round = 1
                         combat_begun = True
+                        access_inv_from_combat_boolean = True
 
                         print("You see the following enemies closing in on you:")
                         print_combat_ranks(combat_rank_list)
@@ -428,14 +419,98 @@ if __name__ == '__main__':
                                         f"and {cur_combat_char.accuracy} accuracy. "
                                         f"The party has {ammo_total} ammunition between them.",TOTAL_LINE_W,False)
             print(char_summary_str)
-            print("You have the following commands available to you: 'FIGHT'")
+            char_options_str = wrap_str("You have the following commands available to you: 'F'IGHT, 'A'DVANCE, 'W'ITHDRAW, 'I'NV, 'D'ODGE, 'R'UN, 'ABIL'ITY, 'O'VERWATCH, 'S'UPPRESS, 'H'IDE",TOTAL_LINE_W,False)
+            print(char_options_str)
             input_str = input("Enter a combat command now.> ").upper().strip()
             print("")
-            if input_str == "FIGHT" or input_str == "F":
+            if input_str == "F":
                 cur_game_state = GAME_STATE_COMBAT_CHOOSE_ATTACK
                 choose_weapon_boolean = True
+            #region Advance or Withdraw logic:
+            elif input_str == "A" or input_str == "W":
+                advanced_boolean = True
+                move_dir = -1
+                if input_str == "W":
+                    advanced_boolean = False
+                    move_dir = 1
+
+                valid_advance = False
+
+                if advanced_boolean and cur_combat_char.cur_combat_rank - 1 >= 0:
+                    valid_advance = True
+
+                if not advanced_boolean and cur_combat_char.cur_combat_rank + 1 < len(combat_rank_list):
+                    valid_advance = True
+
+                if valid_advance:
+                    #Add to next rank in combat_rank_list
+                    combat_rank_list[cur_combat_char.cur_combat_rank+move_dir].append(cur_combat_char)
+                    #Remove from cur rank in combat_rank_list
+                    combat_rank_list[cur_combat_char.cur_combat_rank].remove(cur_combat_char)
+                    #Adjust instance var:
+                    cur_combat_char.cur_combat_rank += move_dir
+                    if advanced_boolean:
+                        print(f"{cur_combat_char.name} advances...\n")
+                    else:
+                        print(f"{cur_combat_char.name} withdraws...\n")
+                    #Check to see if moving from this rank would allow an enemy a free hit from:
+                    #overwatch and melee attacks of opportunity
+                    prev_index_for_cur_combat_char = combat_initiative_list.index(cur_combat_char)
+
+                    #IMPORTANT: ADJUST prev_index_for_cur_combat_char by -1 if they died while advacing or withdrawing!
+
+                    # Advance cur_combat_char (and possibly cur_combat_round):
+                    cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(cur_combat_char,
+                                                                                                                        combat_initiative_list,
+                                                                                                                        cur_combat_room_id,
+                                                                                                                        cur_combat_round,
+                                                                                                                        prev_index_for_cur_combat_char)
+                    #Check end condition, because the pc could've died due to overwatch or opportunity attacks:
+                    combat_concluded_boolean = check_combat_end_condition(cur_combat_room_id)
+
+                    if combat_concluded_boolean:
+                        access_inv_from_combat_boolean = False #reset
+                        # Reset, clear our combat lists:
+                        combat_initiative_list = -1
+                        combat_rank_list = -1
+                        # Go back to our game_state GAME_STATE_INITIALIZING_NEW_TURN to see if other chars in other rooms will be attacked.
+                        cur_game_state = GAME_STATE_INITIALIZING_NEW_TURN
+                        continue_key = input("The battle is over! Press enter to continue.")
+                        print("")
+                    else:
+                        # Await player input before continuing:
+                        continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
+                        print("")
+                else:
+                    print("You cannot move any further in that direction.")
+            #region Dodge logic
+            elif input_str == "D":
+                #Apply dodge bonus boolean
+                cur_combat_char.dodge_bonus_boolean = True
+                print(f"{cur_combat_char.name} is acting defensively, and will receive +1 to their evasion stat until the start of their next turn.\n")
+
+                prev_index_for_cur_combat_char = combat_initiative_list.index(cur_combat_char)
+
+                # Advance cur_combat_char (and possibly cur_combat_round):
+                cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(
+                    cur_combat_char,
+                    combat_initiative_list,
+                    cur_combat_room_id,
+                    cur_combat_round,
+                    prev_index_for_cur_combat_char)
+
+                # Await player input before continuing:
+                continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
+                print("")
+            #endregion
+            #region Access inventory logic
+            elif input_str == "I":
+                cur_game_state = GAME_STATE_ACCESS_INV
+            #endregion
             else:
                 print("That is an invalid combat option, try again.")
+
+            #endregion
 
         #endregion
 
@@ -453,12 +528,7 @@ if __name__ == '__main__':
                         ar_to_use.append(item_id)
                 if len(ar_to_use) == 0:
                     #Means this char has no equipped items--they'll get the option to use their fists:
-                    if cur_combat_char.char_type_enum == ENUM_CHARACTER_GAMER:
-                        fists_item_enum = ENUM_ITEM_FISTS_CHILD
-                    elif cur_combat_char.char_type_enum == ENUM_CHARACTER_OGRE:
-                        fists_item_enum = ENUM_ITEM_FISTS_GIANT
-                    else:
-                        fists_item_enum = ENUM_ITEM_FISTS_ADULT
+                    fists_item_enum = return_fists_enum(cur_combat_char)
                     ar_to_use.append(Item(fists_item_enum))
 
             elif choose_ability_boolean:
@@ -484,8 +554,22 @@ if __name__ == '__main__':
                 try:
                     input_int = int(input_str)
                     if input_int >= 0 and input_int < len(ar_to_use):
-                        cur_combat_char.chosen_weapon = ar_to_use[input_int]
-                        cur_game_state = GAME_STATE_COMBAT_TARGET_RANK
+                        if ar_to_use[input_int].is_shield_boolean == False:
+                            if ammo_total <= 0 and ar_to_use[input_int].requires_ammo_boolean == True:
+                                #You don't have enough ammunition to use that weapon! You could try equipping a different weapon, or attack with your{char specific fists}. Enter 'F' for FISTS to attack with your fists. Any other command will return you to the combat options screen.”
+                                print("You don't have enough ammunition to use that weapon! You could try equipping a different weapon, or attack with your bare fists.")
+                                fists_acknowledgement_str = input("Enter 'F' for 'F'ISTS to attack with your bare fists. Any other command will return you to the combat options screen.").upper().strip()
+                                if fists_acknowledgement_str == "F":
+                                    fists_enum = return_fists_enum(cur_combat_char)
+                                    cur_combat_char.chosen_weapon = Item(fists_enum)
+                                    cur_game_state = GAME_STATE_COMBAT_TARGET_RANK
+                                else:
+                                    cur_game_state = GAME_STATE_COMBAT_ASSIGN_COMMAND
+                            else:
+                                cur_combat_char.chosen_weapon = ar_to_use[input_int]
+                                cur_game_state = GAME_STATE_COMBAT_TARGET_RANK
+                        else:
+                            print("You can't attack with a shield, try again.")
                     else:
                         print("You must choose a valid weapon or ability to fight with, try again.")
                 except ValueError:
@@ -495,10 +579,7 @@ if __name__ == '__main__':
 
         elif cur_game_state == GAME_STATE_COMBAT_TARGET_RANK:
             print("Choose which position to target to attack:")
-            print_combat_ranks(combat_rank_list,True,
-                               cur_combat_char.chosen_weapon.max_range,
-                               cur_combat_char.cur_combat_rank
-                               )
+            print_combat_ranks(combat_rank_list,True,cur_combat_char.chosen_weapon.max_range,cur_combat_char.cur_combat_rank)
             input_str = input("Enter the corresponding number to choose a position to attack, or 'B' or 'BACKUP' to enter a new combat command.> ").upper().strip()
             print("")
             if input_str == "B" or input_str == "BACKUP":
@@ -514,10 +595,12 @@ if __name__ == '__main__':
                                 filtered_enemy_list.append(combat_rank_list[input_int][i])
                         if len(filtered_enemy_list) > 0:
                             cur_combat_char.targeted_rank = input_int
-                            cur_combat_char.accuracy_debuff = return_accuracy_debuff(cur_combat_char.cur_combat_rank,
-                                                                                    cur_combat_char.targeted_rank,
-                                                                                    cur_combat_char.chosen_weapon.max_range)
-                            cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
+                            dist_between_ranks = return_distance_between_ranks(cur_combat_char.cur_combat_rank,
+                                                                               cur_combat_char.targeted_rank)
+                            if dist_between_ranks > cur_combat_char.chosen_weapon.max_range:
+                                print("That position is beyond your equipped weapon's range.")
+                            else:
+                                cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
                         else:
                             print("There are no valid enemy targets in this position to attack, try again.")
                     else:
@@ -532,6 +615,9 @@ if __name__ == '__main__':
         elif cur_game_state == GAME_STATE_COMBAT_EXECUTE_ACTION:
 
             attacking_char = cur_combat_char
+            #We use prev_cur_combat_char in case the attacking_char dies during this combat,
+            # in which 'combat_initiative_list.index(cur_combat_char) would throw an error; it's used in destroy_combatant_inst()
+            prev_cur_combat_char = combat_initiative_list.index(cur_combat_char)
             print(f"{attacking_char.name} is acting now...\n")
 
             if attacking_char.char_team_enum == ENUM_CHAR_TEAM_PC:
@@ -547,63 +633,70 @@ if __name__ == '__main__':
                         if attacking_char.chosen_weapon.aoe_count == -1:
                             enemies_to_target = len(filtered_enemy_list)
                         else:
-                            enemies_to_target = random.randint(1,attacking_char.chosen_weapon.aoe_count)
+                            enemies_to_target = min(random.randint(1, attacking_char.chosen_weapon.aoe_count), len(filtered_enemy_list))
 
                         for i in range(0,enemies_to_target):
 
-                            if len(filtered_enemy_list) > 0:
-                                defending_char = filtered_enemy_list[random.randint(0,len(filtered_enemy_list)-1)]
-                                attacker_accuracy = attacking_char.accuracy - attacking_char.accuracy_debuff
-                                attacker_hit_val = attacker_accuracy - defending_char.evasion
-                                ran_combat_val = random.randint(ENUM_MIN_COMBAT_RAN_NUM,ENUM_MAX_COMBAT_RAN_NUM)
-
-                                # DEBUG: Print the debuff value
-                                print(f"DEBUG: attacking_char.accuracy_debuff = {attacking_char.accuracy_debuff}")
-                                print(f"DEBUG: attacking_char.accuracy = {attacking_char.accuracy}")
-                                print(f"DEBUG: attacking_char.cur_combat_rank = {attacking_char.cur_combat_rank}")
-                                print(f"DEBUG: attacking_char.targeted_rank = {attacking_char.targeted_rank}")
-
-                                #Show player to_hit chance and random value:
-                                if (attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_ADULT or attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_CHILD or
-                                attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_GIANT):
-                                    to_hit_str = wrap_str(
-                                        f"{attacking_char.name} punches with their FISTS. Chance to hit: {attacker_accuracy} (accuracy) - {defending_char.evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.",
-                                        TOTAL_LINE_W, False)
-                                    print(to_hit_str)
-                                    print("")
+                            # Deduct ammunition or deduct ability points:
+                            sufficient_ammo_boolean = True
+                            if attacking_char.char_team_enum == ENUM_CHAR_TEAM_PC and attacking_char.chosen_weapon.requires_ammo_boolean:
+                                if ammo_total <= 0:
+                                    sufficient_ammo_boolean = False
                                 else:
-                                    to_hit_str = wrap_str(f"{attacking_char.name} {attacking_char.chosen_weapon.item_verb} the {attacking_char.chosen_weapon.item_name}. Chance to hit: {attacker_accuracy} (accuracy) - {defending_char.evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.", TOTAL_LINE_W,False)
-                                    print(to_hit_str)
-                                    print("")
-                                if attacker_hit_val >= ran_combat_val:
-                                    #Hit:
-                                    dmg_roll = random.randint(attacking_char.chosen_weapon.dmg_min,attacking_char.chosen_weapon.dmg_max)
-                                    total_dmg = max(0,dmg_roll-defending_char.armor)
-                                    if total_dmg > 0:
-                                        defending_char.hp_cur -= total_dmg
-                                        print(f"The {defending_char.name} has been {attacking_char.chosen_weapon.item_dmg_str} for {total_dmg} damage!\n")
-                                        if defending_char.hp_cur <= 0:
-                                            print(f"{defending_char.name} has been killed!\n")
-                                            # Remove from combat_rank_list:
-                                            combat_rank_list[attacking_char.targeted_rank].remove(defending_char)
-                                            # Remove from combat_initiative_list:
-                                            combat_initiative_list.remove(defending_char)
-                                            # Remove from filtered_enemy_list:
-                                            filtered_enemy_list.remove(defending_char)
-                                            #Remove from corresponding list in room:
-                                            if defending_char.char_team_enum == ENUM_CHAR_TEAM_PC:
-                                                cur_combat_room_id.pcs_in_room_list.remove(defending_char)
-                                            elif defending_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
-                                                cur_combat_room_id.enemies_in_room_list.remove(defending_char)
-                                            else:
-                                                cur_combat_room_id.neutrals_in_room_list.remove(defending_char)
+                                    ammo_total -= 1
+
+                            if sufficient_ammo_boolean:
+                                if len(filtered_enemy_list) > 0:
+                                    defending_char = filtered_enemy_list[random.randint(0,len(filtered_enemy_list)-1)]
+                                    attacker_accuracy = attacking_char.accuracy - attacking_char.accuracy_debuff
+                                    defender_evasion = defending_char.evasion
+                                    if defending_char.dodge_bonus_boolean:
+                                        defender_evasion += 1
+                                    attacker_hit_val = attacker_accuracy - defender_evasion
+                                    ran_combat_val = random.randint(ENUM_MIN_COMBAT_RAN_NUM,ENUM_MAX_COMBAT_RAN_NUM)
+
+                                    #Show player to_hit chance and random value:
+                                    if (attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_ADULT or attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_CHILD or
+                                    attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_GIANT):
+                                        to_hit_str = wrap_str(
+                                            f"{attacking_char.name} punches with their {attacking_char.chosen_weapon.item_name}. Chance to hit: {attacker_accuracy} (accuracy) - {defender_evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.",
+                                            TOTAL_LINE_W, False)
+                                        print(to_hit_str)
+                                        print("")
                                     else:
-                                        print(f"The {defending_char.name} was hit, but their armor absorbs the damage!\n")
+                                        to_hit_str = wrap_str(f"{attacking_char.name} {attacking_char.chosen_weapon.item_verb} the {attacking_char.chosen_weapon.item_name}. Chance to hit: {attacker_accuracy} (accuracy) - {defender_evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.", TOTAL_LINE_W,False)
+                                        print(to_hit_str)
+                                        print("")
+                                    #Hit-miss logic
+                                    if attacker_hit_val >= ran_combat_val:
+                                        #Hit:
+                                        dmg_roll = random.randint(attacking_char.chosen_weapon.dmg_min,attacking_char.chosen_weapon.dmg_max)
+                                        total_dmg = max(0,dmg_roll-defending_char.armor)
+                                        if total_dmg > 0:
+                                            defending_char.hp_cur -= total_dmg
+                                            print(f"The {defending_char.name} has been {attacking_char.chosen_weapon.item_dmg_str} for {total_dmg} damage!\n")
+                                            #Destroy defending instance
+                                            if defending_char.hp_cur <= 0:
+                                                print(f"{defending_char.name} has been killed!\n")
+
+                                                combat_rank_list, combat_initiative_list, filtered_enemy_list, pc_char_list,enemy_char_list,neutral_char_list = destroy_combatant_inst(combat_rank_list,
+                                                                                                                                       combat_initiative_list,
+                                                                                                                                       filtered_enemy_list,
+                                                                                                                                       defending_char,
+                                                                                                                                       attacking_char.targeted_rank,
+                                                                                                                                       cur_combat_room_id,pc_char_list,enemy_char_list,neutral_char_list)
+
+                                        else:
+                                            print(f"The {defending_char.name} was hit, but their armor absorbs the damage!\n")
+                                    else:
+                                        print(
+                                            f"{attacking_char.name} misses the {defending_char.name} with their attack!\n")
                                 else:
-                                    print(
-                                        f"{attacking_char.name} misses the {defending_char.name} with their attack!\n")
+                                    print("debug only: filtered_list is empty, last enemy instance in this rank deleted.")
+                                    break
                             else:
-                                print("debug only: filtered_list is empty, last enemy instance in this rank deleted.")
+                                print(f"The {attacking_char.chosen_weapon.item_name} jammed! {attacking_char.name} is out of ammo!\n")
+                                break
                     else:
                         print("There are no valid enemy targets to attack in this position!")
                 else:
@@ -613,35 +706,28 @@ if __name__ == '__main__':
                 print("Enemy AI not yet implemented.\n")
             #Before advancing to a new char, wipe the char's 'chosen_weapon' var (not strictly necessary but good practice):
             attacking_char.chosen_weapon = -1
-            #Advance cur_combat_char global var
-                #Warning - this line WILL throw an error if the cur_combat_char can't be found in the init_list...
-                #Of course, the only way that would happen would be if attacker's can somehow get damaged by defenders
-            cur_index = combat_initiative_list.index(cur_combat_char)
 
-            # check to see if we need to fill and reorganize the combat_initiative_list:
-            if cur_index+1 >= len(combat_initiative_list):
+            #Advance cur_combat_char (and possibly cur_combat_round):
+            cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(cur_combat_char,
+                                                                                                                combat_initiative_list,
+                                                                                                                cur_combat_room_id,
+                                                                                                                cur_combat_round,
+                                                                                                                prev_cur_combat_char)
+            combat_concluded_boolean = check_combat_end_condition(cur_combat_room_id)
+
+            if combat_concluded_boolean:
+                access_inv_from_combat_boolean = False  # reset
+                #Reset, clear our combat lists:
                 combat_initiative_list = -1
-                combat_initiative_list = []
-                #Setup combat init list
-                combat_initiative_list = fill_combat_initiative_list(cur_combat_room_id)
-                #Organize it by speed:
-                combat_initiative_list = organize_initiative_list(combat_initiative_list)
-                #Assign global cur_combat_char as the first index position:
-                cur_combat_char = combat_initiative_list[0]
-                cur_combat_round += 1
-                print(f"Round {cur_combat_round} begins.\n")
+                combat_rank_list = -1
+                #Go back to our game_state GAME_STATE_INITIALIZING_NEW_TURN to see if other chars in other rooms will be attacked.
+                cur_game_state = GAME_STATE_INITIALIZING_NEW_TURN
+                continue_key = input("The battle is over! Press enter to continue.")
+                print("")
             else:
-                #Assign cur_combat_char as the next char in our initiative_list
-                cur_combat_char = combat_initiative_list[cur_index+1]
-
-            #Move to assign commands or execute ai
-            if cur_combat_char.char_team_enum == ENUM_CHAR_TEAM_PC:
-                cur_game_state = GAME_STATE_COMBAT_ASSIGN_COMMAND
-            else:
-                cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
-            #In either case, await player input before continuing:
-            continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
-            print("")
+               #Await player input before continuing:
+               continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
+               print("")
 
         # endregion
 
@@ -855,7 +941,12 @@ if __name__ == '__main__':
 
         elif cur_game_state == GAME_STATE_ACCESS_INV:
 
-            cur_char.print_char_inv()
+            if not access_inv_from_combat_boolean:
+                inv_char = cur_char
+            elif access_inv_from_combat_boolean:
+                inv_char = cur_combat_char
+
+            inv_char.print_char_inv()
 
             inv_input_str = input().upper().strip()
 
@@ -866,8 +957,11 @@ if __name__ == '__main__':
             item_index = -1
 
             if inv_input_str == "B" or inv_input_str == "BACK":
-                cur_game_state = GAME_STATE_MAIN
-                print_room_recap = True
+                if not access_inv_from_combat_boolean:
+                    cur_game_state = GAME_STATE_MAIN
+                    print_room_recap = True
+                else:
+                    cur_game_state = GAME_STATE_COMBAT_ASSIGN_COMMAND
 
             elif inv_input_str.startswith("L"):
                 show_item_desc_boolean = True
@@ -895,7 +989,7 @@ if __name__ == '__main__':
                     except ValueError:
                         pass
                 else:
-                    print(f"There is no one else in the same room as {cur_char.name} to give the item to.")
+                    print(f"There is no one else in the same room as {inv_char.name} to give the item to.")
             else:
                 try:
                     item_index = int(inv_input_str)
@@ -904,47 +998,64 @@ if __name__ == '__main__':
                     pass
 
             if valid_selection:
-                if item_index >= 0 and item_index < len(cur_char.inv_list):
+                if item_index >= 0 and item_index < len(inv_char.inv_list):
                     #Store item instance id:
-                    selected_item = cur_char.inv_list[item_index]
+                    selected_item = inv_char.inv_list[item_index]
                     if isinstance(selected_item, Item):
                         #'G' give an item to another player
                         if give_item_boolean:
-                            passing_item_id = selected_item
-                            passing_item_index = item_index
-                            cur_game_state = GAME_STATE_PASSING_ITEM
+                            if not access_inv_from_combat_boolean:
+                                passing_item_id = selected_item
+                                passing_item_index = item_index
+                                cur_game_state = GAME_STATE_PASSING_ITEM
+                            else:
+                                print("You can't perform that action during combat.")
                         #'L'ook at item:
                         elif show_item_desc_boolean:
                             selected_item.print_item_desc()
                         #'D'rop item:
                         elif drop_item_boolean:
-                            cur_char.drop_item_into_room(selected_item,item_index, cur_grid_to_use[cur_char.cur_grid_y][cur_char.cur_grid_x])
+                            if not access_inv_from_combat_boolean:
+                                inv_char.drop_item_into_room(selected_item,item_index, cur_grid_to_use[inv_char.cur_grid_y][inv_char.cur_grid_x])
+                            else:
+                                cur_combat_char.drop_item_into_room(selected_item,item_index,cur_combat_room_id)
                         # Use item:
                         elif selected_item.usable_boolean == True:
-                            selected_item.use_item()
+                            if not access_inv_from_combat_boolean:
+                                selected_item.use_item()
+                            else:
+                                print("You can't (yet) perform that action during combat.")
                         else:
                             if selected_item.equippable_boolean == True:
                                 #Determine if we need to unequip, equip, swap, or use item:
                                 if item_index <= ENUM_EQUIP_SLOT_LH:
-                                    #Unequip item, if it's already equipped as one of the equipment slots:
-                                    cur_char.unequip_item(selected_item,item_index)
+                                    if not access_inv_from_combat_boolean:
+                                        #Unequip item, if it's already equipped as one of the equipment slots:
+                                        inv_char.unequip_item(selected_item,item_index)
+                                    else:
+                                        if item_index == ENUM_EQUIP_SLOT_LH or item_index == ENUM_EQUIP_SLOT_RH:
+                                            # Unequip item, if it's already equipped as one of the equipment slots:
+                                            inv_char.unequip_item(selected_item, item_index)
+                                        else:
+                                            print("You don't have time to unequip body or accessory slots during combat.")
+                                #Equip an item from one of the backpack slots:
                                 elif item_index > ENUM_EQUIP_SLOT_LH:
-                                    if cur_char.check_valid_item_equip(selected_item):
-                                        cur_char.equip_item(selected_item,item_index)
-                                    """ Previous code
-                                    #Store the index of where the item is supposed to be equipped on the char's equip slots:
-                                    selected_item_equip_slot = selected_item.equip_slot_enum
-                                    #If that position where this item is supposed to go is already occupied by another item, then swap the positions of the two:
-                                    if cur_char.inv_list[selected_item_equip_slot] != -1 and isinstance(cur_char.inv_list[selected_item_equip_slot], Item):
-                                        #swap equipped with unequipped item, then equip item:
-                                        swapping_item_id = cur_char.inv_list[selected_item_equip_slot]
-                                        swapping_item_index = cur_char.inv_list[selected_item_equip_slot].equip_slot_enum
-                                        cur_char.swap_equip_item(swapping_item_id,swapping_item_index,selected_item,item_index)
-                                    #If that position where this item is supposed to go is empty, then simply move the item to that position:
-                                    elif cur_char.inv_list[selected_item_equip_slot] == -1:
-                                        #Equip item to an empty slot:
-                                        cur_char.equip_item(selected_item,item_index)
-                                    """
+                                    if not access_inv_from_combat_boolean:
+                                        if inv_char.check_valid_item_equip(selected_item):
+                                            inv_char.equip_item(selected_item,item_index)
+                                    else:
+                                        if isinstance(selected_item.equip_slot_list,list):
+                                            #Check to see if our equip_slot_list contains the lh or rh macro we're looking for
+                                            lh_or_rh_slot_boolean = check_equip_slot_list_for_rh_or_lh(selected_item.equip_slot_list)
+
+                                            if lh_or_rh_slot_boolean:
+                                                if inv_char.check_valid_item_equip(selected_item):
+                                                    inv_char.equip_item(selected_item, item_index)
+                                            else:
+                                                print("You don't have time to equip body or accessory slots during combat.")
+                                        else:
+                                            print(f"Debug: Equipping items from backpack slots during combat: some use-case slipped through the cracks, "
+                                                  f"we were trying to equip the {selected_item.item_name} but it is not an equippable item.")
                             else:
                                 print(f"The {selected_item.item_name} is not an equippable item.")
                     else:
@@ -952,7 +1063,7 @@ if __name__ == '__main__':
                 else:
                     print("Invalid selection, try again.")
             else:
-                if cur_game_state != GAME_STATE_MAIN:
+                if cur_game_state != GAME_STATE_MAIN and cur_game_state != GAME_STATE_COMBAT_ASSIGN_COMMAND:
                     print("Invalid selection, try again.")
 
         #endregion
