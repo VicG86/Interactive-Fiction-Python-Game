@@ -44,7 +44,7 @@ if __name__ == '__main__':
     ammo_total = 0
 
     combat_initiative_list = -1
-    cur_combat_char_index = -1
+    cur_combat_char = -1
     cur_combat_round = 0
     combat_rank_list = -1
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                                                ENUM_CHAR_TEAM_NEUTRAL))
             location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(neutral_char_list[len(neutral_char_list)-1],True)
 
-        for i in range(0,random.randint(1,1)):
+        for i in range(0,random.randint(3,6)):
 
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SKITTERING_LARVA, origin_grid_x, origin_grid_y, location_grid_niffy,
@@ -95,7 +95,7 @@ if __name__ == '__main__':
             location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(
                 enemy_char_list[len(enemy_char_list) - 1], True)
 
-        for i in range(0, random.randint(1, 1)):
+        for i in range(0, random.randint(1, 4)):
 
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_LUMBERING_MAULER, origin_grid_x, origin_grid_y, location_grid_niffy,
@@ -104,7 +104,7 @@ if __name__ == '__main__':
             location_grid_niffy[origin_grid_y][origin_grid_x].add_or_remove_char_to_room_list(
                 enemy_char_list[len(enemy_char_list) - 1], True)
 
-        for i in range(0, random.randint(1, 1)):
+        for i in range(0, random.randint(1, 3)):
 
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SPINED_SPITTER, origin_grid_x, origin_grid_y, location_grid_niffy,
@@ -126,7 +126,7 @@ if __name__ == '__main__':
         if i == ENUM_CHARACTER_OGRE:
             total_chars_bio_list.append("Cragos, 'The Ogre':\n\nCragos was intended to be just another of the millions of faceless clones born into servitude by the Kethas Corporation, but a power surge in his gestation vat caused an excessive amount of growth hormone to be released into his developmental stew. As a result, he emerged from his birthing chamber weeks before his brothers and sisters, a hulking giant of a man with the mind of a child, and a misshapen face that only a mother could love... If only he had one.\n\nThe scientists at Keth Corp. were bemused by this unanticipated variant, and rigorously tested his physical and mental capabilities to determine the viability of his strain. They called it 'testing,' but Cragos would come to know the euphimism for what it truly was: torture.\n\nHe was only six weeks old by the time they had subjected him to a battery of tests that included blunt force trauma, precision tissue damage, and unimaginable G-forces, all to determine the tolerances of his physical structure, and also the rate of his healing factor, which surpassed even that of his kin. He was at least spared the psychological conditioning, not by any act of mercy, but merely because he was overlooked and forgotten after the researchers grew bored of his screams, labeling his mutation as 'UNSATISFACTORY.' He was deemed too large and clumsy to be useful on the battlefield, and too hideous to serve as steward in the gilded homes of the elite back in the Core.\n\nHe would have been reprocessed and recycled, in fact, liquified and fed back to his fellow clones as essential nutrients, had the interstellar freighter that was his home not been attacked by raiders from the Fringe. It was of course Keth Corp. policy to never reveal the secrets of their proprietary technology, and so they reduced the massive hulk of their starship to ruins in the depths of space, rather than submit to the pirate's boarding party. The brigands did not leave empty handed, nonetheless.\n\nThey found Cragos still clinging to life in a small pressurized compartment in a field of floating debris, like a cockroach that refused to die, or a caterpillar cocooned in stasis, patiently awaiting chrysalis. Unlike the scientists at Keth Corp., they found good use for his muscle among their ranks, all right.\n\nBanditry was their trade, and his healing factor an invaluable asset. The absence of psychological conditioning had made it possible for Cragos to adjust to their nomadic lifestyle, to view himself as an invidual at last, as a person who could inspire respect--if never love.\n\nThey named him 'Cragos,' after the son of the stone god who ruled the mountains of their homeworld. And as the years passed he became well known as the most vicious and relentless of their clan. Eventually he outlived them all, and when the very last of their clan had been struck down by enforcers from the Core, Cragos struck out into the void to earn his own coin, plying his trade as a mercenary for hire, a dealer of death and punishment alike. Yet he never forgot the faces of his tormentors who had given him life, and always he hoarded the horror of his past as fuel for future conquests.\n\nIt was a kidnapping job gone sideways that found him in a stasis chamber aboard the Keth Corp. research vessel 'Niffy.' And there he remains: a caged animal once more, eyes closed, yet not sleeping--always dreaming of vengeance against the inexhaustible and inexorable corporation that made him... Always dreaming... And always promising pain.\n\nGameplay features: Cragos is a resilient tank who deals double damage with melee weapons and extra damage with his fists. He is very fond of wrestling opponents and dismembering them with his bare hands, often putting himself into compromised positions in order to do so. His RAGE meter builds while fighting and when it reaches 10, he becomes uncontrollable for 6-10 turns, smashing room features, items, or attacking friendly characters. He has poor accuracy when using ranged weapons, and therefore should rely upon weapons that offer multiple hits, such as the shotgun or flame thrower. He is also too large to be able to use the 'HIDE' command. Abilities: Healing Factor: automatically heals 1 hp and 1 infection point every 3-4 turns (passive); Thick Hide: +2 armor value (passive)")
             primary_role_str = "SECURITY"
-            char_class_snippet = "This giant brute almost looks like the standard variant of the Keth Corporation clone, only... bigger. Much bigger. Uglier, too."
+            char_class_snippet = "This stubbled brute almost looks like the standard variant of the Keth Corporation clone, only... bigger. Much bigger. Uglier, too."
         elif i == ENUM_CHARACTER_SOLDIER:
             total_chars_bio_list.append("This character's backstory is not yet defined.\n\nGameplay features: As a security character, Cooper excels when buffing allies and pinning enemies down with suppressive fire. His starting kit is effective enough to give him an edge in combat for much of the early game. Abilities: Suppressing fire: 1 AP: For the next turn, any enemy that Cooper targets has a 100% chance of becoming suppressed; Focus Fire: 2 AP: For the next 2-3 turns, all friendly characters in the current battle receive +2 to their accuracy stat; Take Command: 5 AP: All friendly characters in the same room as Cooper reduce their sanity meter by 1.")
             primary_role_str = "SECURITY"
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         elif i == ENUM_CHARACTER_ENGINEER:
             total_chars_bio_list.append("This character's backstory is not yet defined.\n\nGameplay features: ")
             primary_role_str = "ENGINEER"
-            char_class_snippet = "The blue overcoat emblazoned with the Keth Corporation's sigil of a star cresting the shoulder of a shadowed planet all indicate that this is a company man. Someone from the engineering department, most likely."
+            char_class_snippet = "The blue overcoat emblazoned with the Keth Corporation's sigil of a star cresting the shoulder of a shadowed planet suggests that this is a company man. Someone from the engineering department, most likely."
         elif i == ENUM_CHARACTER_CEO:
             total_chars_bio_list.append("This character's backstory is not yet defined.")
             primary_role_str = "CIVILIAN"
@@ -379,16 +379,25 @@ if __name__ == '__main__':
                             combat_rank_list.clear()
                         #organize it by starting positions:
                         combat_rank_list = organize_combat_rank_list(combat_initiative_list)
-
+                        #Go through combat_initiative_list, assign the Character.cur_combat_rank var as starting_combat_rank
+                        for i in range(0,len(combat_initiative_list)):
+                            combat_initiative_list[i].cur_combat_rank = combat_initiative_list[i].starting_combat_rank
+                        #Assign our global cur_combat_char for the first time:
+                        cur_combat_char = combat_initiative_list[0]
                         #Change game state to GAME_STATE_COMBAT_EXECUTE_ACTION or GAME_STATE_COMBAT_ASSIGN_COMMAND,
                         #depending on pc first or enemy first
-                        if combat_initiative_list[0].char_team_enum == ENUM_CHAR_TEAM_PC:
+                        if cur_combat_char.char_team_enum == ENUM_CHAR_TEAM_PC:
                             cur_game_state = GAME_STATE_COMBAT_ASSIGN_COMMAND
                         else:
                             cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
-                        cur_combat_char_index = 0
-                        cur_combat_round = 0
+                        cur_combat_round = 1
                         combat_begun = True
+
+                        print("You see the following enemies closing in on you:")
+                        print_combat_ranks(combat_rank_list)
+                        print("")
+                        any_key = input(f"Round {cur_combat_round} of combat has begun! Press enter to continue.")
+                        print("")
                         break
 
             #If we completely get through this for loop without a battle being initiated, always set cur_char to first
@@ -411,12 +420,12 @@ if __name__ == '__main__':
             print(battlefield_summary_str)
             print_combat_ranks(combat_rank_list)
             print("")
-            char_summary_str = wrap_str(f"You are {combat_initiative_list[cur_combat_char_index].name}. "
-                                        f"You have {combat_initiative_list[cur_combat_char_index].hp_cur} hit points out of {combat_initiative_list[cur_combat_char_index].hp_max}. "
-                                        f"You have {combat_initiative_list[cur_combat_char_index].sanity_cur} sanity points out of {combat_initiative_list[cur_combat_char_index].sanity_max},"
-                                        f" {combat_initiative_list[cur_combat_char_index].armor} armor, "
-                                        f"{combat_initiative_list[cur_combat_char_index].evasion} evasion, "
-                                        f"and {combat_initiative_list[cur_combat_char_index].accuracy} accuracy. "
+            char_summary_str = wrap_str(f"You are {cur_combat_char.name}. "
+                                        f"You have {cur_combat_char.hp_cur} hit points out of {cur_combat_char.hp_max}. "
+                                        f"You have {cur_combat_char.sanity_cur} sanity points out of {cur_combat_char.sanity_max},"
+                                        f" {cur_combat_char.armor} armor, "
+                                        f"{cur_combat_char.evasion} evasion, "
+                                        f"and {cur_combat_char.accuracy} accuracy. "
                                         f"The party has {ammo_total} ammunition between them.",TOTAL_LINE_W,False)
             print(char_summary_str)
             print("You have the following commands available to you: 'FIGHT'")
@@ -439,14 +448,14 @@ if __name__ == '__main__':
                 ar_to_use = []
                 desc_str = "Choose equipped weapon"
                 for i in range(ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH+1):
-                    item_id = combat_initiative_list[cur_combat_char_index].inv_list[i]
+                    item_id = cur_combat_char.inv_list[i]
                     if isinstance(item_id,Item):
                         ar_to_use.append(item_id)
                 if len(ar_to_use) == 0:
                     #Means this char has no equipped items--they'll get the option to use their fists:
-                    if combat_initiative_list[cur_combat_char_index].char_type_enum == ENUM_CHARACTER_GAMER:
+                    if cur_combat_char.char_type_enum == ENUM_CHARACTER_GAMER:
                         fists_item_enum = ENUM_ITEM_FISTS_CHILD
-                    elif combat_initiative_list[cur_combat_char_index].char_type_enum == ENUM_CHARACTER_OGRE:
+                    elif cur_combat_char.char_type_enum == ENUM_CHARACTER_OGRE:
                         fists_item_enum = ENUM_ITEM_FISTS_GIANT
                     else:
                         fists_item_enum = ENUM_ITEM_FISTS_ADULT
@@ -456,8 +465,8 @@ if __name__ == '__main__':
                 ar_to_use = []
                 desc_str = "Choose combat ability"
                 for i in range(ENUM_EQUIP_SLOT_RH, ENUM_EQUIP_SLOT_LH + 1):
-                    if isinstance(combat_initiative_list[cur_combat_char_index].ability_list, list):
-                        abil_id = combat_initiative_list[cur_combat_char_index].ability_list[i]
+                    if isinstance(cur_combat_char.ability_list, list):
+                        abil_id = cur_combat_char.ability_list[i]
                         if isinstance(abil_id, Abil):
                             ar_to_use.append(abil_id)
             else:
@@ -475,7 +484,7 @@ if __name__ == '__main__':
                 try:
                     input_int = int(input_str)
                     if input_int >= 0 and input_int < len(ar_to_use):
-                        combat_initiative_list[cur_combat_char_index].chosen_weapon = ar_to_use[input_int]
+                        cur_combat_char.chosen_weapon = ar_to_use[input_int]
                         cur_game_state = GAME_STATE_COMBAT_TARGET_RANK
                     else:
                         print("You must choose a valid weapon or ability to fight with, try again.")
@@ -486,10 +495,13 @@ if __name__ == '__main__':
 
         elif cur_game_state == GAME_STATE_COMBAT_TARGET_RANK:
             print("Choose which position to target to attack:")
-            print_combat_ranks(combat_rank_list)
+            print_combat_ranks(combat_rank_list,True,
+                               cur_combat_char.chosen_weapon.max_range,
+                               cur_combat_char.cur_combat_rank
+                               )
             input_str = input("Enter the corresponding number to choose a position to attack, or 'B' or 'BACKUP' to enter a new combat command.> ").upper().strip()
             print("")
-            if input_int == "B" or input_int == "BACKUP":
+            if input_str == "B" or input_str == "BACKUP":
                 cur_game_state = GAME_STATE_COMBAT_ASSIGN_COMMAND
             else:
                 try:
@@ -501,7 +513,10 @@ if __name__ == '__main__':
                             if combat_rank_list[input_int][i].char_team_enum == ENUM_CHAR_TEAM_ENEMY:
                                 filtered_enemy_list.append(combat_rank_list[input_int][i])
                         if len(filtered_enemy_list) > 0:
-                            combat_initiative_list[cur_combat_char_index].targeted_rank = input_int
+                            cur_combat_char.targeted_rank = input_int
+                            cur_combat_char.accuracy_debuff = return_accuracy_debuff(cur_combat_char.cur_combat_rank,
+                                                                                    cur_combat_char.targeted_rank,
+                                                                                    cur_combat_char.chosen_weapon.max_range)
                             cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
                         else:
                             print("There are no valid enemy targets in this position to attack, try again.")
@@ -516,7 +531,7 @@ if __name__ == '__main__':
         # region GAME_STATE_COMBAT_EXECUTE_ACTION
         elif cur_game_state == GAME_STATE_COMBAT_EXECUTE_ACTION:
 
-            attacking_char = combat_initiative_list[cur_combat_char_index]
+            attacking_char = cur_combat_char
             print(f"{attacking_char.name} is acting now...\n")
 
             if attacking_char.char_team_enum == ENUM_CHAR_TEAM_PC:
@@ -529,58 +544,102 @@ if __name__ == '__main__':
                             filtered_enemy_list.append(combat_rank_list[attacking_char.targeted_rank][i])
                     if len(filtered_enemy_list) > 0:
                         #Choose random enemy in already defined rank:
-                        defending_char = filtered_enemy_list[random.randint(0,len(filtered_enemy_list)-1)]
-                        attacker_hit_val = attacking_char.accuracy - defending_char.evasion
-                        if attacker_hit_val >= random.randint(ENUM_MIN_COMBAT_RAN_NUM,ENUM_MAX_COMBAT_RAN_NUM):
-                            #Hit:
-                            dmg_roll = random.randint(attacking_char.chosen_weapon.dmg_min,attacking_char.chosen_weapon.dmg_max)
-                            total_dmg = max(0,dmg_roll-defending_char.armor)
-                            if total_dmg > 0:
-                                defending_char.hp_cur -= total_dmg
-                                print(f"{defending_char.name} has taken {total_dmg} damage from the attack!")
-                                if defending_char.hp_cur <= 0:
-                                    print(f"{defending_char.name} has been killed!")
-                                    #Remove from combat_rank_list:
-                                    for defending_char in combat_rank_list[attacking_char.targeted_rank]:
-                                        index = combat_rank_list[attacking_char.targeted_rank].index(defending_char)
-                                        del combat_rank_list[attacking_char.targeted_rank][index]
-                                    #Remove from combat_initiative_list:
-                                    for defending_char in combat_initiative_list:
-                                        index = combat_initiative_list.index(defending_char)
-                                        del combat_initiative_list[index]
-                            else:
-                                print(f"{attacking_char.name} hits the {defending_char.name}, but their armor absorbs the damage.")
+                        if attacking_char.chosen_weapon.aoe_count == -1:
+                            enemies_to_target = len(filtered_enemy_list)
                         else:
-                            print(
-                                f"{attacking_char.name} misses the {defending_char.name} with their attack!")
+                            enemies_to_target = random.randint(1,attacking_char.chosen_weapon.aoe_count)
+
+                        for i in range(0,enemies_to_target):
+
+                            if len(filtered_enemy_list) > 0:
+                                defending_char = filtered_enemy_list[random.randint(0,len(filtered_enemy_list)-1)]
+                                attacker_accuracy = attacking_char.accuracy - attacking_char.accuracy_debuff
+                                attacker_hit_val = attacker_accuracy - defending_char.evasion
+                                ran_combat_val = random.randint(ENUM_MIN_COMBAT_RAN_NUM,ENUM_MAX_COMBAT_RAN_NUM)
+
+                                # DEBUG: Print the debuff value
+                                print(f"DEBUG: attacking_char.accuracy_debuff = {attacking_char.accuracy_debuff}")
+                                print(f"DEBUG: attacking_char.accuracy = {attacking_char.accuracy}")
+                                print(f"DEBUG: attacking_char.cur_combat_rank = {attacking_char.cur_combat_rank}")
+                                print(f"DEBUG: attacking_char.targeted_rank = {attacking_char.targeted_rank}")
+
+                                #Show player to_hit chance and random value:
+                                if (attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_ADULT or attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_CHILD or
+                                attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_GIANT):
+                                    to_hit_str = wrap_str(
+                                        f"{attacking_char.name} punches with their FISTS. Chance to hit: {attacker_accuracy} (accuracy) - {defending_char.evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.",
+                                        TOTAL_LINE_W, False)
+                                    print(to_hit_str)
+                                    print("")
+                                else:
+                                    to_hit_str = wrap_str(f"{attacking_char.name} {attacking_char.chosen_weapon.item_verb} the {attacking_char.chosen_weapon.item_name}. Chance to hit: {attacker_accuracy} (accuracy) - {defending_char.evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.", TOTAL_LINE_W,False)
+                                    print(to_hit_str)
+                                    print("")
+                                if attacker_hit_val >= ran_combat_val:
+                                    #Hit:
+                                    dmg_roll = random.randint(attacking_char.chosen_weapon.dmg_min,attacking_char.chosen_weapon.dmg_max)
+                                    total_dmg = max(0,dmg_roll-defending_char.armor)
+                                    if total_dmg > 0:
+                                        defending_char.hp_cur -= total_dmg
+                                        print(f"The {defending_char.name} has been {attacking_char.chosen_weapon.item_dmg_str} for {total_dmg} damage!\n")
+                                        if defending_char.hp_cur <= 0:
+                                            print(f"{defending_char.name} has been killed!\n")
+                                            # Remove from combat_rank_list:
+                                            combat_rank_list[attacking_char.targeted_rank].remove(defending_char)
+                                            # Remove from combat_initiative_list:
+                                            combat_initiative_list.remove(defending_char)
+                                            # Remove from filtered_enemy_list:
+                                            filtered_enemy_list.remove(defending_char)
+                                            #Remove from corresponding list in room:
+                                            if defending_char.char_team_enum == ENUM_CHAR_TEAM_PC:
+                                                cur_combat_room_id.pcs_in_room_list.remove(defending_char)
+                                            elif defending_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                                                cur_combat_room_id.enemies_in_room_list.remove(defending_char)
+                                            else:
+                                                cur_combat_room_id.neutrals_in_room_list.remove(defending_char)
+                                    else:
+                                        print(f"The {defending_char.name} was hit, but their armor absorbs the damage!\n")
+                                else:
+                                    print(
+                                        f"{attacking_char.name} misses the {defending_char.name} with their attack!\n")
+                            else:
+                                print("debug only: filtered_list is empty, last enemy instance in this rank deleted.")
                     else:
                         print("There are no valid enemy targets to attack in this position!")
                 else:
-                    print(f"The target has moved positions! {attacking_char.name} misses with their attack!")
+                    print(f"There are no valid enemy targets to attack in this position!")
             else:
                 #Execute enemy ai:
-                print("Enemy AI not yet implemented.")
+                print("Enemy AI not yet implemented.\n")
             #Before advancing to a new char, wipe the char's 'chosen_weapon' var (not strictly necessary but good practice):
             attacking_char.chosen_weapon = -1
-            #Advance cur_combat_char_index
-            cur_combat_char_index += 1
+            #Advance cur_combat_char global var
+                #Warning - this line WILL throw an error if the cur_combat_char can't be found in the init_list...
+                #Of course, the only way that would happen would be if attacker's can somehow get damaged by defenders
+            cur_index = combat_initiative_list.index(cur_combat_char)
+
             # check to see if we need to fill and reorganize the combat_initiative_list:
-            if cur_combat_char_index >= len(combat_initiative_list):
+            if cur_index+1 >= len(combat_initiative_list):
                 combat_initiative_list = -1
                 combat_initiative_list = []
                 #Setup combat init list
                 combat_initiative_list = fill_combat_initiative_list(cur_combat_room_id)
                 #Organize it by speed:
                 combat_initiative_list = organize_initiative_list(combat_initiative_list)
-                cur_combat_char_index = 0
+                #Assign global cur_combat_char as the first index position:
+                cur_combat_char = combat_initiative_list[0]
                 cur_combat_round += 1
+                print(f"Round {cur_combat_round} begins.\n")
+            else:
+                #Assign cur_combat_char as the next char in our initiative_list
+                cur_combat_char = combat_initiative_list[cur_index+1]
+
             #Move to assign commands or execute ai
-            if combat_initiative_list[cur_combat_char_index].char_team_enum == ENUM_CHAR_TEAM_PC:
+            if cur_combat_char.char_team_enum == ENUM_CHAR_TEAM_PC:
                 cur_game_state = GAME_STATE_COMBAT_ASSIGN_COMMAND
             else:
                 cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
             #In either case, await player input before continuing:
-            print("")
             continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
             print("")
 

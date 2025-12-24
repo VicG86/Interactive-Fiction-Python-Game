@@ -118,7 +118,9 @@ ENUM_ITEM_STEEL_CLUB = 42 #Can only be obtained by manufacturing; probably won't
 ENUM_ITEM_STEEL_SPEAR = 43 #Can only be obtained by manufacturing; probably won't implement
 ENUM_ITEM_STEEL_SWORD = 44 #Can only be obtained by manufacturing; probably won't implement
 
-ENUM_ITEM_TOTAL_ITEMS = 45
+ENUM_ITEM_KIRAS_NOISY_GAME = 45 #Can be triggered and then dropped; it causes enemies in adjacent rooms to come flocking toward it, potentially breaking down doors to do so.
+
+ENUM_ITEM_TOTAL_ITEMS = 46
 
 ENUM_CHARACTER_MERCENARY_MECH = 0 #Sec - Comes equipped with built-in hand-flamer, laser, and wrist rockets which use ability points rather than ammunition.
 ENUM_CHARACTER_GAMER = 1 #Survivor - Hacker, gamer, a girl; only character that is small enough to use vents. Is better at hiding than other characters.
@@ -218,11 +220,11 @@ ENUM_AI_COMBAT_MELEE = 1
 ENUM_AI_COMBAT_RANGED = 2
 
 #In general, for any stat, 7 (which represents a 70% chance) should be average
-ENUM_AVERAGE_ACCURACY_SCORE = 7
+ENUM_AVERAGE_ACCURACY_SCORE = 8
 ENUM_AVERAGE_EVASION_SCORE = 0
 ENUM_MIN_COMBAT_RAN_NUM = 0 #Should also be used for skill checks
 ENUM_MAX_COMBAT_RAN_NUM = 9
-ENUM_MAX_RAN_INITIATIVE_VAL = 7
+ENUM_MAX_RAN_INITIATIVE_VAL = 9
 
 
 

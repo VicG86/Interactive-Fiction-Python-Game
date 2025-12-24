@@ -17,7 +17,7 @@ class Character:
         self.dexterity = 0
         self.accuracy = ENUM_AVERAGE_ACCURACY_SCORE
         self.stealth = 0 #When you consider that rooms add or subtract to this value based upon their cover amount, the average here can be lower than 7
-        self.speed = 0
+        self.speed = 0 #9 is current max, so a char with with 9 base speed would have to roll a 0, and a character with a base speed of 0 would have to roll a 9 to beat them.
 
         self.ran_init_val = 0 #A random value assigned that helps determine when characters act in combat
 
@@ -43,15 +43,19 @@ class Character:
         self.cur_action_points = 2
         self.max_action_points = 2
 
+        self.accuracy_debuff = 0 #Used in conjunction with return_accuracy_debuff to determine accuracy debuff for characters in combat
+
         self.inv_list = []
         self.ability_list = -1
 
         self.char_team_enum = char_team_enum
 
         self.name = "Not defined"
-        self.char_pronoun = "he"
+        self.subjective_pronoun = "he"
+        self.possessive_pronoun = "his"
 
         self.starting_combat_rank = ENUM_RANK_PC_MIDDLE
+        self.cur_combat_rank = 0
         self.participated_in_new_turn_battle = False
         self.combat_ai_preference = ENUM_AI_COMBAT_STANDARD
         self.chosen_weapon = -1
@@ -98,9 +102,11 @@ class Character:
             # self.equip_item(item_to_equip,item_to_equip.equip_slot_enum,True)
             item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
             self.equip_item(item_to_equip, -1, True)
+            item_to_equip = Item(ENUM_ITEM_SHOTGUN)
+            self.equip_item(item_to_equip, -1, True)
 
         elif char_type_enum == ENUM_CHARACTER_BIOLOGIST:
-            self.name = "Revita, 'The Biologist'"
+            self.name = "Chavrita, 'The Biologist'"
             self.hp_max = 6
             self.hp_cur = 6
             self.ability_points_cur = 3
@@ -118,8 +124,10 @@ class Character:
             self.intelligence = 8
             self.wisdom = 6
             self.dexterity = 2
+            self.speed = 2
 
-            self.char_pronoun = "she"
+            self.subjective_pronoun = "she"
+            self.possessive_pronoun = "her"
 
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_MEDICAL_SCRUBS)
@@ -146,6 +154,7 @@ class Character:
             self.intelligence = 6
             self.wisdom = 6
             self.dexterity = 1
+            self.speed = 3
 
             # Starting equipment
             # item_to_equip = Item(ENUM_ITEM_ENGINEER_GARB)
@@ -172,7 +181,7 @@ class Character:
             self.intelligence = 4
             self.wisdom = 4
             self.dexterity = 2
-            self.speed = 1
+            self.speed = 4
 
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_ENGINEER_GARB)
@@ -197,14 +206,15 @@ class Character:
             self.intelligence = 7
             self.wisdom = 7
             self.dexterity = 3
-            self.speed = 2
+            self.speed = 5
 
             self.res_fire = 50
             self.res_vacuum = 50
             self.res_gas = 50
             self.res_electric = -50
 
-            self.char_pronoun = "she"
+            self.subjective_pronoun = "she"
+            self.possessive_pronoun = "her"
 
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
@@ -229,7 +239,7 @@ class Character:
             self.intelligence = 3
             self.wisdom = 3
             self.dexterity = 3
-            self.speed = 1
+            self.speed = 4
 
             self.armor = 1
 
@@ -241,6 +251,8 @@ class Character:
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
             self.equip_item(item_to_equip, -1,True)
+            item_to_equip = Item(ENUM_ITEM_FLAME_THROWER)
+            self.equip_item(item_to_equip, -1, True)
 
         elif char_type_enum == ENUM_CHARACTER_SOLDIER:
             self.name = "Cooper, 'The Security Guard'"
@@ -255,12 +267,13 @@ class Character:
             self.security = 7
             self.science = 0
             self.scavenging = 2
-            self.stealth = 5
+            self.stealth = 3
 
             self.strength = 7
             self.intelligence = 1
             self.wisdom = 2
             self.dexterity = 2
+            self.speed = 2
 
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_FLAK_ARMOR)
@@ -271,15 +284,19 @@ class Character:
             self.equip_item(item_to_equip, -1, True)
             item_to_equip = Item(ENUM_ITEM_BALLISTIC_PISTOL)
             self.add_item_to_backpack(item_to_equip ,True)
-            item_to_equip = Item(ENUM_ITEM_TASER)
+            item_to_equip = Item(ENUM_ITEM_STUN_BATON)
             self.add_item_to_backpack(item_to_equip ,True)
             item_to_equip = Item(ENUM_ITEM_FLASHLIGHT)
             self.add_item_to_backpack(item_to_equip ,True)
             item_to_equip = Item(ENUM_ITEM_ADRENAL_PEN)
             self.add_item_to_backpack(item_to_equip ,True)
-            item_to_equip = Item(ENUM_ITEM_SUIT_MARINE)
+            item_to_equip = Item(ENUM_ITEM_POLICE_TRUNCHEON)
             self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_RIOT_SHIELD)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_MEDKIT)
+            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_GRENADES)
             self.add_item_to_backpack(item_to_equip, True)
 
         elif char_type_enum == ENUM_CHARACTER_SCIENTIST:
@@ -293,7 +310,7 @@ class Character:
 
             self.engineering = 2
             self.security = 0
-            self.science = 6
+            self.science = 9
             self.scavenging = 1
             self.stealth = 4
 
@@ -301,6 +318,7 @@ class Character:
             self.intelligence = 9
             self.wisdom = 9
             self.dexterity = 2
+            self.speed = 3
 
             item_to_equip = Item(ENUM_ITEM_SCIENTIST_LABCOAT)
             self.equip_item(item_to_equip ,-1,True)
@@ -325,6 +343,7 @@ class Character:
             self.intelligence = 0
             self.wisdom = 0
             self.dexterity = 4
+            self.speed = 7
 
             self.evasion = ENUM_AVERAGE_EVASION_SCORE + 1  # Better than average at evading
 
@@ -345,12 +364,12 @@ class Character:
             self.science = 6
             self.scavenging = 0
             self.stealth = 4
-            self.speed = 1
 
             self.strength = 9
             self.intelligence = 4
             self.wisdom = 8
             self.dexterity = 2
+            self.speed = 5
 
             self.res_fire = 100
             self.res_vacuum = 100
@@ -371,12 +390,12 @@ class Character:
             self.science = 3
             self.scavenging = 3
             self.stealth = 6
-            self.speed = 1
 
             self.strength = 1
             self.intelligence = 3
             self.wisdom = 4
             self.dexterity = 2
+            self.speed = 4
 
             item_to_equip = Item(ENUM_ITEM_OFFICER_JUMPSUIT)
             self.equip_item(item_to_equip ,-1,True)
@@ -395,19 +414,22 @@ class Character:
             self.science = 1
             self.scavenging = 5
             self.stealth = 10
-            self.speed = 3
 
             self.strength = 0
             self.intelligence = 2
             self.wisdom = 1
             self.dexterity = 7
+            self.speed = 8
 
             self.evasion = ENUM_AVERAGE_EVASION_SCORE+1 #Better than average at evading
 
-            self.char_pronoun = "she"
+            self.subjective_pronoun = "she"
+            self.possessive_pronoun = "her"
 
             item_to_equip = Item(ENUM_ITEM_CIVILIAN_JUMPSUIT)
             self.equip_item(item_to_equip ,-1,True)
+            item_to_equip = Item(ENUM_ITEM_KIRAS_NOISY_GAME)
+            self.add_item_to_backpack(item_to_equip, True)
 
         elif char_type_enum == ENUM_CHARACTER_PLAYBOY:
             self.name = "Oberon, 'The Playboy'"
@@ -423,12 +445,12 @@ class Character:
             self.science = 1
             self.scavenging = 3
             self.stealth = 6
-            self.speed = 1
 
             self.strength = 3
             self.intelligence = 2
             self.wisdom = 1
             self.dexterity = 5
+            self.speed = 6
 
             item_to_equip = Item(ENUM_ITEM_CIVILIAN_JUMPSUIT)
             self.equip_item(item_to_equip ,-1,True)
@@ -452,6 +474,7 @@ class Character:
             self.intelligence = 8
             self.wisdom = 8
             self.dexterity = 2
+            self.speed = 2
 
             starting_combat_rank = ENUM_RANK_PC_NEAR
 
@@ -467,7 +490,7 @@ class Character:
             self.ability_points_max = 3
             self.sanity_cur = 20
             self.sanity_max = 20
-            self.speed = 4
+            self.speed = 8
 
             self.armor = 0
             self.evasion = 3
@@ -508,13 +531,13 @@ class Character:
             self.sanity_max = 20
 
             self.armor = 0
-            self.evasion = 0
+            self.evasion = 1
             self.res_fire = 0
             self.res_vacuum = 100
             self.res_gas = 100
             self.res_electric = 0
 
-            self.speed = 1
+            self.speed = 3
 
             self.starting_combat_rank = ENUM_RANK_ENEMY_FAR
 

@@ -29,7 +29,15 @@ def check_for_equipped_weapon(char_id):
 
     return False
 
-def print_combat_ranks(combat_rank_list):
+def return_accuracy_debuff(coord_1, coord_2,item_max_range):
+    accuracy_debuff = 0
+    dist_to_target = abs(coord_1 - coord_2)
+    if dist_to_target > item_max_range:
+        accuracy_debuff = abs(dist_to_target - item_max_range)
+
+    return accuracy_debuff
+
+def print_combat_ranks(combat_rank_list,show_distance_debuff = False, item_max_range = 0,acting_char_rank = 0):
     for i in range(0, len(combat_rank_list)):
         rank_str = ""
         if i == ENUM_RANK_ENEMY_FAR:
@@ -59,6 +67,11 @@ def print_combat_ranks(combat_rank_list):
             # Build the string: "Name (count); Name (count)"
             groups = [f"{name} ({count})" if count > 1 else name for name, count in name_counts.items()]
             rank_str += "; ".join(groups)
+
+        # Add accuracy debuff information if requested
+        if show_distance_debuff and item_max_range != -1:
+            accuracy_debuff = return_accuracy_debuff(acting_char_rank, i, item_max_range)
+            rank_str += f" - accuracy change: {-accuracy_debuff}"
 
         rank_str = wrap_str(rank_str, TOTAL_LINE_W, False)
 
