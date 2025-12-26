@@ -82,22 +82,26 @@ if __name__ == '__main__':
     debug_chars = True
     if debug_chars:
         ammo_total += 5
-        for i in range(0,1):
+        for i in range(0,0):
             neutral_char_list.append(Character(ENUM_CHARACTER_NEUTRAL_INFECTED_SCIENTIST,origin_grid_x,origin_grid_y,location_grid_niffy,
                                                ENUM_CHAR_TEAM_NEUTRAL))
-        for i in range(0,random.randint(3,6)): #3,6
+
+        for i in range(0,random.randint(0,0)): #3,6
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SKITTERING_LARVA, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY))
-        for i in range(0, random.randint(1, 6)): #1,4
+
+        for i in range(0, random.randint(0, 0)): #1,4
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_LUMBERING_MAULER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY))
-        for i in range(0, random.randint(1, 6)): #1,3
+
+        for i in range(0, random.randint(2, 2)): #1,3
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SPINED_SPITTER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY))
-        for i in range(0, random.randint(1, 6)): #1,3
+
+        for i in range(0, random.randint(2, 2)): #1,3
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SODDEN_SHAMBLER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY))
@@ -419,40 +423,27 @@ if __name__ == '__main__':
                                         f"and {cur_combat_char.accuracy} accuracy. "
                                         f"The party has {ammo_total} ammunition between them.",TOTAL_LINE_W,False)
             print(char_summary_str)
-            char_options_str = wrap_str("You have the following commands available to you: 'F'IGHT, 'A'DVANCE, 'W'ITHDRAW, 'I'NV, 'D'ODGE, 'R'UN, 'ABIL'ITY, 'O'VERWATCH, 'S'UPPRESS, 'H'IDE",TOTAL_LINE_W,False)
+            char_options_str = wrap_str("You have the following commands available to you: 'F'IGHT, 'A'DVANCE, 'W'ITHDRAW, 'I'NV, 'D'ODGE, 'R'UN, 'ABIL'ITY, 'O'VERWATCH, 'S'UPPRESS",TOTAL_LINE_W,False)
             print(char_options_str)
             input_str = input("Enter a combat command now.> ").upper().strip()
             print("")
-            if input_str == "F":
+            if input_str == "F" or input_str == "FIGHT":
                 cur_game_state = GAME_STATE_COMBAT_CHOOSE_ATTACK
                 choose_weapon_boolean = True
             #region Advance or Withdraw logic:
-            elif input_str == "A" or input_str == "W":
-                advanced_boolean = True
-                move_dir = -1
-                if input_str == "W":
-                    advanced_boolean = False
+            elif input_str == "A" or input_str == "ADVANCE" or input_str == "W" or input_str == "WITHDRAW":
+                valid_advance = False
+                if input_str == "A" or input_str == "ADVANCE":
+                    move_dir = -1
+                if input_str == "W" or input_str == "WITHDRAW":
                     move_dir = 1
 
-                valid_advance = False
-
-                if advanced_boolean and cur_combat_char.cur_combat_rank - 1 >= 0:
-                    valid_advance = True
-
-                if not advanced_boolean and cur_combat_char.cur_combat_rank + 1 < len(combat_rank_list):
+                if cur_combat_char.cur_combat_rank + move_dir >= 0 and cur_combat_char.cur_combat_rank + move_dir < len(combat_rank_list):
                     valid_advance = True
 
                 if valid_advance:
                     #Add to next rank in combat_rank_list
-                    combat_rank_list[cur_combat_char.cur_combat_rank+move_dir].append(cur_combat_char)
-                    #Remove from cur rank in combat_rank_list
-                    combat_rank_list[cur_combat_char.cur_combat_rank].remove(cur_combat_char)
-                    #Adjust instance var:
-                    cur_combat_char.cur_combat_rank += move_dir
-                    if advanced_boolean:
-                        print(f"{cur_combat_char.name} advances...\n")
-                    else:
-                        print(f"{cur_combat_char.name} withdraws...\n")
+                    combat_rank_list = advance_or_withdraw_char(move_dir,combat_rank_list,cur_combat_char)
                     #Check to see if moving from this rank would allow an enemy a free hit from:
                     #overwatch and melee attacks of opportunity
                     prev_index_for_cur_combat_char = combat_initiative_list.index(cur_combat_char)
@@ -484,7 +475,7 @@ if __name__ == '__main__':
                 else:
                     print("You cannot move any further in that direction.")
             #region Dodge logic
-            elif input_str == "D":
+            elif input_str == "D" or input_str == "DODGE":
                 #Apply dodge bonus boolean
                 cur_combat_char.dodge_bonus_boolean = True
                 print(f"{cur_combat_char.name} is acting defensively, and will receive +1 to their evasion stat until the start of their next turn.\n")
@@ -504,7 +495,7 @@ if __name__ == '__main__':
                 print("")
             #endregion
             #region Access inventory logic
-            elif input_str == "I":
+            elif input_str == "I" or input_str == "INV":
                 cur_game_state = GAME_STATE_ACCESS_INV
             #endregion
             else:
@@ -608,7 +599,6 @@ if __name__ == '__main__':
                 except ValueError:
                     print("That is an invalid command.")
 
-
         # endregion
 
         # region GAME_STATE_COMBAT_EXECUTE_ACTION
@@ -620,23 +610,186 @@ if __name__ == '__main__':
             prev_cur_combat_char = combat_initiative_list.index(cur_combat_char)
             print(f"{attacking_char.name} is acting now...\n")
 
-            if attacking_char.char_team_enum == ENUM_CHAR_TEAM_PC:
-                #Check to see if there's even any enemies in that rank anymore:
-                if len(combat_rank_list[attacking_char.targeted_rank]) > 0:
-                    #Create a new list to get only the enemies from this rank:
-                    filtered_enemy_list = []
-                    for i in range(0,len(combat_rank_list[attacking_char.targeted_rank])):
-                        if combat_rank_list[attacking_char.targeted_rank][i].char_team_enum == ENUM_CHAR_TEAM_ENEMY:
-                            filtered_enemy_list.append(combat_rank_list[attacking_char.targeted_rank][i])
-                    if len(filtered_enemy_list) > 0:
-                        #Choose random enemy in already defined rank:
-                        if attacking_char.chosen_weapon.aoe_count == -1:
-                            enemies_to_target = len(filtered_enemy_list)
+            #region Enemy or Neutral AI code:
+            if attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY or attacking_char.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL:
+                #Reset these vars:
+                attacking_char.enemy_ai_move_boolean = False
+                attacking_char.enemy_ai_fight_boolean = False
+
+                if attacking_char.combat_ai_preference == ENUM_AI_COMBAT_RANGED:
+                    #Define attacker team:
+                    attacker_team = attacking_char.char_team_enum
+                    attacker_team_str = "undefined"
+                    if attacker_team == ENUM_CHAR_TEAM_NEUTRAL:
+                        attacker_team_str = "NEUTRAL TEAM"
+                    elif attacker_team == ENUM_CHAR_TEAM_ENEMY:
+                        attacker_team_str = "ENEMY TEAM"
+                    #Reset to throw an error if its not defined:
+                    attacking_char.targeted_rank = -1
+                    # Define 'chosen weapon' for this enemy or neutral
+                        #Shuffle ability list to ensure that items with equal max range are chosen randomly
+                    random.shuffle(attacking_char.ability_list)
+                    #Search for ability item with the maximum range
+                    attacking_char.ability_list.sort(key=attrgetter('max_range'),reverse=True)
+                    #Define chosen weapon as the weapon with the maximum range
+                    attacking_char.chosen_weapon = attacking_char.ability_list[0]
+                    ideal_abil_range = attacking_char.chosen_weapon.max_range
+                    #Define the 'alternate' weapon for this char -- in this case it will their ability with the lowest range:
+                    attacking_char.ability_list.sort(key=attrgetter('max_range'), reverse=False)
+                    attacking_char.ai_inferior_alternate_wep = attacking_char.ability_list[0]
+                    alternate_abil_range = attacking_char.ai_inferior_alternate_wep.max_range
+
+                    #Determine if you need to move closer to get it within range;
+                    # or farther away to maintain your ideal_abil_range:
+                        #Find nearest pc: cur_combat_rank
+                    origin_rank = attacking_char.cur_combat_rank
+                    nearest_target_list = []
+
+                    #Iterate through combat_initiative_list, add pc or neutral (or enemy, if this is a neutral char);
+                    #Calc dist between each once and self; add:
+                    for i in range(0,len(combat_initiative_list)):
+                        char_id = combat_initiative_list[i]
+                        if attacker_team == ENUM_CHAR_TEAM_ENEMY:
+                            if char_id.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL or char_id.char_team_enum == ENUM_CHAR_TEAM_PC:
+                                char_id.dist_to_enemy = return_distance_between_ranks(char_id.cur_combat_rank,origin_rank)
+                                nearest_target_list.append(char_id)
+                        elif attacker_team == ENUM_CHAR_TEAM_NEUTRAL:
+                            if char_id.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                                char_id.dist_to_enemy = return_distance_between_ranks(char_id.cur_combat_rank,origin_rank)
+                                nearest_target_list.append(char_id)
+
+                    #Randomize, sort positions in list:
+                    random.shuffle(nearest_target_list)
+                    nearest_target_list.sort(key=attrgetter('dist_to_enemy'))
+
+                    #"""Okay, we've defined the closest applicable pc rank to us; the rest of this AI generally tries to
+                    # move away from that closest rank to maintain its max_range between itself and that rank, or it will
+                    # try to move closer if the target rank is outside of the max range. It also won't move into or out
+                    # of any rank that has over-watch on it if it can use over-watch itself.
+                    # That's it"""
+
+                        #Define our nearest pc rank as our target rank:
+                    attacking_char.targeted_rank = nearest_target_list[0].cur_combat_rank
+                    print(
+                        f"Debug: Enemy AI: {attacking_char.name} determined that the rank {attacking_char.targeted_rank} was the rank in which the closest pc to them resides."
+                        f"Their enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
+
+                    #Calculate dist between cur_rank and the rank we've targeted:
+                    dist_between_target = return_distance_between_ranks(attacking_char.targeted_rank,attacking_char.cur_combat_rank)
+                    print(
+                        f"Debug: Enemy AI: {attacking_char.name} the distance between them (their current rank = {attacking_char.cur_combat_rank}) and their chosen rank was: {dist_between_target}.")
+
+                    if dist_between_target == ideal_abil_range:
+                        #Targeted rank has already been set, just move to fight:
+                        attacking_char.enemy_ai_fight_boolean = True
+                        print(
+                            f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target == {dist_between_target}, which is the same as their ideal_target_range of: {ideal_abil_range}--so they have decided to attack.")
+
+                    elif dist_between_target < ideal_abil_range:
+                        print(
+                            f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target did NOT equal their ideal_target_range of: {ideal_abil_range}--"
+                            f"BUT they were < than their ideal_abil_range, so they have decided to try and move either north or south, if able, to maintain their ideal abil range.")
+
+                        #First, determine if the pc is lower or higer than you in the ranks.
+                        attacker_north_of_target = False
+                        attacker_south_of_target = False
+                        attacker_even_with_target = False
+                        # Target is NORTH of you - so you want to move SOUTH
+                        if attacking_char.cur_combat_rank > attacking_char.targeted_rank:
+                            move_dir = 1
+                            attacker_south_of_target = True
+                            print(f"Debug: Enemy AI: {attacking_char.name} wants to move south.")
+                        #Target is SOUTH of you - so you want to move NORTH
+                        elif attacking_char.cur_combat_rank < attacking_char.targeted_rank:
+                            move_dir = -1
+                            attacker_north_of_target = True
+                            print(f"Debug: Enemy AI: {attacking_char.name} wants to move north.")
+                        #If it's even with you, then either move north (if enemy) or south (if neutral) choose a direction:
                         else:
-                            enemies_to_target = min(random.randint(1, attacking_char.chosen_weapon.aoe_count), len(filtered_enemy_list))
+                            if attacker_team == ENUM_CHAR_TEAM_ENEMY:
+                                move_dir = -1 #Just have them run north for now, which is logically where most of their allies will collect. Was previously assigning move_dir as random: attacking_char.randomly_chosen_move_dir #This is chosen randomly at instance creation, should hopefully give the enemy a better chance of consistently moving in one direction or the other.
+                                attacker_even_with_target = True
+                            elif attacker_team == ENUM_CHAR_TEAM_NEUTRAL:
+                                move_dir = 1  # Just have them run north for now, which is logically where most of their allies will collect. Was previously assigning move_dir as random: attacking_char.randomly_chosen_move_dir #This is chosen randomly at instance creation, should hopefully give the enemy a better chance of consistently moving in one direction or the other.
+                                attacker_even_with_target = True
+                                print(
+                                    f"Debug: Enemy AI: {attacking_char.name}: target was in the same rank as us, our move_dir now == {move_dir}")
 
+                        #Determine if it can actually move in that direction:
+                        if attacking_char.cur_combat_rank + move_dir >= 0 and attacking_char.cur_combat_rank + move_dir < len(combat_rank_list):
+                            combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
+                                                                        cur_combat_char)
+                            print(f"Debug: Enemy AI: {attacking_char.name} was able to advance or withdraw to adjust their rank in relation to their nearest pc target in order to utilize their max_range. enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
+                        else:
+                            #If we can't move in any further in that direction, just choose the nearest pc rank for attack:
+                            print(f"Debug: Enemy AI: {attacking_char.name}: Couldn't move any further north or south as they were already on the boundaries of combat_rank_list.")
+
+                            attacking_char.targeted_rank = nearest_target_list[0].cur_combat_rank
+                            attacking_char.enemy_ai_fight_boolean = True
+                            print(f"Debug: Enemy AI: {attacking_char.name}: Our distance between ourself and our target rank: {dist_between_target} was <= our ideal_abil_range: {ideal_abil_range}."
+                                  f"So we're just going to attack them.")
+                            #Additionally, if the target_rank is == to our current_rank, that means the targets have backed this unit
+                            #into a wall; as a reward for the player, this AI should now choose the inferior weapon from their abil list
+                            if attacking_char.targeted_rank == attacking_char.cur_combat_rank:
+                                attacking_char.chosen_weapon = attacking_char.ai_inferior_alternate_wep
+                                print(f"Debug: Enemy AI: {attacking_char.name}: This ai unit with RANGED_PREFERENCE has been backed into a wall and targets are in its same rank (melee range); as a reward for the player, this target will now be forced to use their inferior weapon.")
+
+                    elif dist_between_target > ideal_abil_range:
+                        #We need to move closer:
+                        print(
+                            f"Debug: Enemy AI: {attacking_char.name}: Our distance between ourself and our target rank: {dist_between_target} was > our ideal_abil_range (our max_range): {ideal_abil_range}."
+                            f"So we're going to move closer to them.")
+                        # Target is NORTH of you - move north to move closer to it:
+                        if attacking_char.cur_combat_rank > attacking_char.targeted_rank:
+                            move_dir = -1
+                        # Target is SOUTH of you - move south to move closer to it:
+                        elif attacking_char.cur_combat_rank < attacking_char.targeted_rank:
+                            move_dir = 1
+                        elif attacking_char.cur_combat_rank == attacking_char.targeted_rank:
+                            #This technically should never be the case, because otherwise dist_between_target <= ideal_abil_range would have triggered
+                            print(f"Debug: For enemy ai with name of: {attacking_char.name}: something really odd happened, dist_between_target was greater than ideal_abil_range, but enemy was also in the same rank as the targeted_rank. Investigate.")
+                        #Advance or withdraw to get closer to our target rank:
+                        combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
+                                                                    cur_combat_char)
+
+                elif attacking_char.combat_ai_preference == ENUM_AI_COMBAT_MELEE:
+                    pass
+
+            #endregion
+
+            #Actual FIGHT code:
+            #Check to see if there's even any enemies in that rank anymore:
+            if attacking_char.enemy_ai_fight_boolean or attacking_char.char_team_enum == ENUM_CHAR_TEAM_PC:
+
+                if len(combat_rank_list[attacking_char.targeted_rank]) > 0:
+                    #Create a new list to get only the enemies of the opposite team from this rank:
+                    filtered_enemy_list = []
+                    #Add Characters from the attacker's opposing team to the filtered_enemy_list
+                    for i in range(0,len(combat_rank_list[attacking_char.targeted_rank])):
+                        if attacking_char.char_team_enum == ENUM_CHAR_TEAM_PC or attacking_char.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL:
+                            if combat_rank_list[attacking_char.targeted_rank][i].char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                                filtered_enemy_list.append(combat_rank_list[attacking_char.targeted_rank][i])
+                        elif attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                            if (combat_rank_list[attacking_char.targeted_rank][i].char_team_enum == ENUM_CHAR_TEAM_PC or
+                            combat_rank_list[attacking_char.targeted_rank][i].char_team_enum == ENUM_CHAR_TEAM_NEUTRAL):
+                                filtered_enemy_list.append(combat_rank_list[attacking_char.targeted_rank][i])
+
+                    #Define how we'll iterate through filtered lsit:
+                        # We'll iterate through the filtered_list sequentially, choosing new targets each time:
+                    target_all_enemies = False
+                    cur_target_index_in_list = 0
+                    if attacking_char.chosen_weapon.aoe_count == -1:
+                        enemies_to_target = len(filtered_enemy_list)
+                        target_all_enemies = True
+                    # Define enemies_to_target to choose a random defender in already defined rank:
+                    else:
+                        enemies_to_target = min(random.randint(1, attacking_char.chosen_weapon.aoe_count),
+                                                len(filtered_enemy_list))
+                    #Move into iteration code:
+                    if len(filtered_enemy_list) > 0:
+
+                        #Iterate
                         for i in range(0,enemies_to_target):
-
                             # Deduct ammunition or deduct ability points:
                             sufficient_ammo_boolean = True
                             if attacking_char.char_team_enum == ENUM_CHAR_TEAM_PC and attacking_char.chosen_weapon.requires_ammo_boolean:
@@ -647,34 +800,50 @@ if __name__ == '__main__':
 
                             if sufficient_ammo_boolean:
                                 if len(filtered_enemy_list) > 0:
-                                    defending_char = filtered_enemy_list[random.randint(0,len(filtered_enemy_list)-1)]
-                                    attacker_accuracy = attacking_char.accuracy - attacking_char.accuracy_debuff
+                                    #Define our defending char as either a random target in that rank (if target_all_enemies == False);
+                                    if not target_all_enemies:
+                                        defending_char = filtered_enemy_list[random.randint(0,len(filtered_enemy_list)-1)]
+                                    #Define our defending char as the next target in the filtered list, then iterate index var:
+                                    elif target_all_enemies:
+                                        defending_char = filtered_enemy_list[cur_target_index_in_list]
+                                        cur_target_index_in_list += 1
+                                    #Begin to_hit calculation:
+                                    attacker_accuracy = attacking_char.accuracy
+                                    #Melee character gets slight to_hit bonus with melee weapons
+                                    if attacking_char.char_type_enum == ENUM_CHARACTER_OGRE and attacking_char.chosen_weapon.max_range == 0:
+                                        attacker_accuracy += 1
                                     defender_evasion = defending_char.evasion
                                     if defending_char.dodge_bonus_boolean:
                                         defender_evasion += 1
-                                    attacker_hit_val = attacker_accuracy - defender_evasion
+                                    #Create alternate string and add to attackers_accuracy if defender's evasion is less than 0:
+                                    alternate_to_hit_str = ""
+                                    if defender_evasion < 0:
+                                        attacker_hit_val = attacker_accuracy + abs(defender_evasion)
+                                        alternate_to_hit_str = " Their accuracy was boosted by the defender's negative evasion value instead!"
+                                    else:
+                                        attacker_hit_val = attacker_accuracy - defender_evasion
+
                                     ran_combat_val = random.randint(ENUM_MIN_COMBAT_RAN_NUM,ENUM_MAX_COMBAT_RAN_NUM)
 
-                                    #Show player to_hit chance and random value:
-                                    if (attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_ADULT or attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_CHILD or
-                                    attacking_char.chosen_weapon.item_enum == ENUM_ITEM_FISTS_GIANT):
-                                        to_hit_str = wrap_str(
-                                            f"{attacking_char.name} punches with their {attacking_char.chosen_weapon.item_name}. Chance to hit: {attacker_accuracy} (accuracy) - {defender_evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.",
-                                            TOTAL_LINE_W, False)
-                                        print(to_hit_str)
-                                        print("")
-                                    else:
-                                        to_hit_str = wrap_str(f"{attacking_char.name} {attacking_char.chosen_weapon.item_verb} the {attacking_char.chosen_weapon.item_name}. Chance to hit: {attacker_accuracy} (accuracy) - {defender_evasion} (enemy evasion) = {attacker_hit_val}. Rolled: {ran_combat_val}.", TOTAL_LINE_W,False)
-                                        print(to_hit_str)
-                                        print("")
+                                    #Show player the to_hit chance and random value:
+                                    to_hit_str = wrap_str(
+                                        f"{attacking_char.name} {attacking_char.chosen_weapon.item_verb} {attacking_char.chosen_weapon.item_name}. Chance to hit: {attacker_accuracy} (accuracy) reduced by {defender_evasion} (defender's evasion) = {attacker_hit_val}.{alternate_to_hit_str} Rolled: {ran_combat_val}.",
+                                        TOTAL_LINE_W, False)
+                                    print(to_hit_str)
+                                    print("")
+
                                     #Hit-miss logic
                                     if attacker_hit_val >= ran_combat_val:
                                         #Hit:
                                         dmg_roll = random.randint(attacking_char.chosen_weapon.dmg_min,attacking_char.chosen_weapon.dmg_max)
+                                        #Add extra damage if Cragos is attacking in melee:
+                                        if attacking_char.char_type_enum == ENUM_CHARACTER_OGRE and attacking_char.chosen_weapon.max_range == 0:
+                                            dmg_roll += random.randint(1,3)
                                         total_dmg = max(0,dmg_roll-defending_char.armor)
                                         if total_dmg > 0:
                                             defending_char.hp_cur -= total_dmg
-                                            print(f"The {defending_char.name} has been {attacking_char.chosen_weapon.item_dmg_str} for {total_dmg} damage!\n")
+                                            #Print damage results along with armor reduction
+                                            print(f"The {defending_char.name} has been {attacking_char.chosen_weapon.item_dmg_str} for {dmg_roll} damage - {defending_char.armor} armor, for a total of {total_dmg} damage!\n")
                                             #Destroy defending instance
                                             if defending_char.hp_cur <= 0:
                                                 print(f"{defending_char.name} has been killed!\n")
@@ -687,7 +856,7 @@ if __name__ == '__main__':
                                                                                                                                        cur_combat_room_id,pc_char_list,enemy_char_list,neutral_char_list)
 
                                         else:
-                                            print(f"The {defending_char.name} was hit, but their armor absorbs the damage!\n")
+                                            print(f"The {defending_char.name} has been {attacking_char.chosen_weapon.item_dmg_str} for {dmg_roll} damage - but their armor fully absorbed the damage!\n")
                                     else:
                                         print(
                                             f"{attacking_char.name} misses the {defending_char.name} with their attack!\n")
@@ -701,9 +870,9 @@ if __name__ == '__main__':
                         print("There are no valid enemy targets to attack in this position!")
                 else:
                     print(f"There are no valid enemy targets to attack in this position!")
-            else:
-                #Execute enemy ai:
-                print("Enemy AI not yet implemented.\n")
+            #endregion
+
+            #region Resolve this phase of combat: advance cur_char, check to see if combat concluded:
             #Before advancing to a new char, wipe the char's 'chosen_weapon' var (not strictly necessary but good practice):
             attacking_char.chosen_weapon = -1
 
@@ -728,6 +897,7 @@ if __name__ == '__main__':
                #Await player input before continuing:
                continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
                print("")
+            #endregion
 
         # endregion
 

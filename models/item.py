@@ -64,7 +64,7 @@ class Item:
             self.item_name = "SHOTGUN"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 2
-            self.item_verb = "pumps"
+            self.item_verb = "pumps the"
             self.item_dmg_str = "shot"
             self.aoe_count = 3
         elif self.item_enum == ENUM_ITEM_REVOLVER:
@@ -73,7 +73,7 @@ class Item:
             self.max_range = 2
             self.item_name = "REVOLVER"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "fires"
+            self.item_verb = "fires the"
             self.item_dmg_str = "shot"
         elif self.item_enum == ENUM_ITEM_LASER_PISTOL:
             self.dmg_min = 1
@@ -82,7 +82,7 @@ class Item:
             self.item_name = "LASER PISTOL"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
             self.max_range = 3
-            self.item_verb = "fires"
+            self.item_verb = "fires the"
             self.item_dmg_str = "burned"
         elif self.item_enum == ENUM_ITEM_GRENADES:
             self.dmg_min = 4
@@ -90,7 +90,7 @@ class Item:
             self.single_use_boolean = True
             self.item_name = "FRAGMENTATION GRENADE"
             self.max_range = 2
-            self.item_verb = "tosses"
+            self.item_verb = "tosses the"
             self.item_dmg_str = "shredded"
             self.aoe_count = 6
         elif self.item_enum == ENUM_ITEM_FLAME_THROWER:
@@ -99,7 +99,7 @@ class Item:
             self.item_name = "FLAMETHROWER"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 1
-            self.item_verb = "spews fire with"
+            self.item_verb = "spews fire with the"
             self.item_dmg_str = "burned"
             self.aoe_count = -1
         elif self.item_enum == ENUM_ITEM_ROCKET_LAUNCHER:
@@ -109,25 +109,25 @@ class Item:
             self.item_name = "ROCKET LAUNCHER"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 6
-            self.item_verb = "fires"
+            self.item_verb = "fires the"
             self.item_dmg_str = "exploded"
             self.aoe_count = -1
         elif self.item_enum == ENUM_ITEM_LEAD_PIPE:
             self.dmg_min = 1
-            self.dmg_max = 3
+            self.dmg_max = 4
             self.requires_ammo_boolean = False
             self.item_name = "LEAD PIPE"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "swings"
+            self.item_verb = "swings the"
             self.item_dmg_str = "blundgeoned"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_MONSTROUS_CLAW:
             self.dmg_min = 2
             self.dmg_max = 5
             self.requires_ammo_boolean = False
-            self.item_name = "MONSTROUS CLAW"
+            self.item_name = "MONSTROUS CLAWS"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "swings"
+            self.item_verb = "swipes with"
             self.item_dmg_str = "slashed"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_LARVA_WRITHING_TENDRIL:
@@ -136,25 +136,34 @@ class Item:
             self.requires_ammo_boolean = False
             self.item_name = "WRITHING TENDRIL"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "whips"
+            self.item_verb = "whips with a"
+            self.item_dmg_str = "slashed"
+            self.max_range = 0
+        elif self.item_enum == ENUM_ITEM_DESPERATE_CLAW:
+            self.dmg_min = 1
+            self.dmg_max = 3
+            self.requires_ammo_boolean = False
+            self.item_name = "DESPERATE CLAW"
+            self.equip_slot_list = [ENUM_EQUIP_SLOT_RH, ENUM_EQUIP_SLOT_LH]  # Indicates either hand can equip
+            self.item_verb = "slashes with a"
             self.item_dmg_str = "slashed"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_LARVA_INJECTION_BARB:
             self.dmg_min = 3
             self.dmg_max = 3
             self.requires_ammo_boolean = False
-            self.item_name = "INJETION BARB"
+            self.item_name = "INFECTED BARB"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "stabs"
+            self.item_verb = "stabs with a"
             self.item_dmg_str = "punctured"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_POLICE_TRUNCHEON:
             self.dmg_min = 3
-            self.dmg_max = 5
+            self.dmg_max = 4
             self.requires_ammo_boolean = False
             self.item_name = "POLICE TRUNCHEON"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "swings"
+            self.item_verb = "swings the"
             self.item_dmg_str = "blundgeoned"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_STUN_BATON: #Has a 50% chance of stunning enemies, minus their electric_res
@@ -163,25 +172,25 @@ class Item:
             self.requires_ammo_boolean = False
             self.item_name = "STUN BATON"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "thrusts"
+            self.item_verb = "thrusts the"
             self.item_dmg_str = "zapped"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_FIRE_AXE:
-            self.dmg_min = 4
-            self.dmg_max = 6
+            self.dmg_min = 2
+            self.dmg_max = 5
             self.requires_ammo_boolean = False
             self.item_name = "FIRE AXE"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "swings"
+            self.item_verb = "swings the"
             self.item_dmg_str = "mauled"
             self.max_range = 0
-        elif self.item_enum == ENUM_ITEM_TASER:
+        elif self.item_enum == ENUM_ITEM_TASER: #High stun chance, extra damage to characters with weak electric_res
             self.dmg_min = 1
             self.dmg_max = 1
             self.requires_ammo_boolean = False
             self.item_name = "TASER"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "fires"
+            self.item_verb = "fires the"
             self.item_dmg_str = "zapped"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_ASSAULT_RIFLE:
@@ -191,7 +200,7 @@ class Item:
             self.item_name = "ASSAULT RIFLE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 3
-            self.item_verb = "fires"
+            self.item_verb = "fires the"
             self.item_dmg_str = "shot"
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
@@ -200,8 +209,8 @@ class Item:
             self.dmg_max = 6
             self.item_name = "SHOOTING SPINE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
-            self.max_range = 4
-            self.item_verb = "fires"
+            self.max_range = 3
+            self.item_verb = "fires with a"
             self.item_dmg_str = "shot"
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
@@ -211,7 +220,7 @@ class Item:
             self.item_name = "VENOMOUS SPINE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 3
-            self.item_verb = "fires"
+            self.item_verb = "fires with a"
             self.item_dmg_str = "shot"
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
@@ -221,16 +230,17 @@ class Item:
             self.item_name = "ACID BILE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 2
-            self.item_verb = "spits"
+            self.item_verb = "spits with"
             self.item_dmg_str = "melted"
             self.aoe_count = 3
+            self.can_overwatch_boolean = True
         elif self.item_enum == ENUM_ITEM_ACID_CLOUD:
             self.dmg_min = 1
             self.dmg_max = 4
             self.item_name = "ACID CLOUD"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 2
-            self.item_verb = "spits"
+            self.item_verb = "belches a massive"
             self.item_dmg_str = "melted"
             self.aoe_count = -1
         elif self.item_enum == ENUM_ITEM_ACID_SACK: #Acts as a proximity mine
@@ -239,7 +249,7 @@ class Item:
             self.item_name = "ACID SACK"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 2
-            self.item_verb = "spits"
+            self.item_verb = "drops a"
             self.item_dmg_str = "melted"
             self.aoe_count = -1
         elif self.item_enum == ENUM_ITEM_SUB_MACHINE_GUN:
@@ -249,7 +259,7 @@ class Item:
             self.item_name = "SUB MACHINE GUN"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 2
-            self.item_verb = "fires"
+            self.item_verb = "fires the"
             self.item_dmg_str = "shot"
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
@@ -260,8 +270,8 @@ class Item:
             self.requires_ammo_boolean = 3
             self.item_name = "MACHINE PISTOL"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.max_range = 1
-            self.item_verb = "fires"
+            self.max_range = 2
+            self.item_verb = "fires the"
             self.item_dmg_str = "shot"
             self.can_suppress_boolean = True
             self.aoe_count = 3
@@ -273,7 +283,7 @@ class Item:
             self.item_name = "SNIPER RIFLE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 4
-            self.item_verb = "fires"
+            self.item_verb = "fires the"
             self.item_dmg_str = "shot"
             self.can_overwatch_boolean = True
         elif self.item_enum == ENUM_ITEM_LASER_RIFLE:
@@ -281,11 +291,11 @@ class Item:
             self.dmg_max = 10
             self.requires_ammo_boolean = False
             self.melee_debuff_boolean = True
-            self.item_name = "SNIPER RIFLE"
+            self.item_name = "LASER RIFLE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 4
-            self.item_verb = "fires"
-            self.item_dmg_str = "burns"
+            self.item_verb = "fires the"
+            self.item_dmg_str = "burned"
             self.can_overwatch_boolean = True
         elif self.item_enum == ENUM_ITEM_MEDKIT:
             self.single_use_boolean = True
@@ -344,8 +354,14 @@ class Item:
         elif self.item_enum == ENUM_ITEM_FLAK_ARMOR:
             self.item_name = "FLAK ARMOR"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_BODY]
-            self.stat_boost_list[ENUM_ITEM_STAT_BOOST_ARMOR] = 2
+            self.stat_boost_list[ENUM_ITEM_STAT_BOOST_ARMOR] = 3
             self.stat_boost_list[ENUM_ITEM_STAT_BOOST_EVASION] = -1
+            self.changes_stats_boolean = True
+        elif self.item_enum == ENUM_ITEM_SECURITY_VEST:
+            self.item_name = "SECURITY VEST"
+            self.equip_slot_list = [ENUM_EQUIP_SLOT_BODY]
+            self.stat_boost_list[ENUM_ITEM_STAT_BOOST_ARMOR] = 1
+            self.stat_boost_list[ENUM_ITEM_STAT_BOOST_EVASION] = 1
             self.changes_stats_boolean = True
         elif self.item_enum == ENUM_ITEM_SUIT_MARINE:
             self.item_name = "MARINE ARMOR"
@@ -395,11 +411,11 @@ class Item:
             self.is_shield_boolean = True
         elif self.item_enum == ENUM_ITEM_FISTS_ADULT:
             self.dmg_min = 1
-            self.dmg_max = 1
+            self.dmg_max = 2
             self.requires_ammo_boolean = False
             self.item_name = "FISTS"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "punches"
+            self.item_verb = "punches with their"
             self.item_dmg_str = "battered"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_FISTS_CHILD:
@@ -408,7 +424,7 @@ class Item:
             self.requires_ammo_boolean = False
             self.item_name = "CHILD FISTS"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "punches"
+            self.item_verb = "punches with their"
             self.item_dmg_str = "battered"
             self.max_range = 0
         elif self.item_enum == ENUM_ITEM_FISTS_GIANT:
@@ -417,7 +433,7 @@ class Item:
             self.requires_ammo_boolean = False
             self.item_name = "GIANT FISTS"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
-            self.item_verb = "punches"
+            self.item_verb = "punches with their"
             self.item_dmg_str = "battered"
             self.max_range = 0
 

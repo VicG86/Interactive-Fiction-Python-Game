@@ -64,6 +64,12 @@ class Character:
         self.combat_ai_preference = ENUM_AI_COMBAT_STANDARD
         self.chosen_weapon = -1
         self.targeted_rank = -1
+        self.ai_inferior_alternate_wep = -1
+
+        self.enemy_ai_move_boolean = False
+        self.enemy_ai_fight_boolean = False
+
+        self.dist_to_enemy = 0 #Used for enemy ai
 
         # Initialize inv_list and nested ENUM_EQUIP_BACKLIST_LIST:
         for i in range(0 ,ENUM_EQUIP_SLOT_TOTAL_SLOTS):
@@ -75,6 +81,8 @@ class Character:
         self.cur_grid_y = spawn_grid_y
 
         self.dodge_bonus_boolean = False
+
+        self.randomly_chosen_move_dir = random.choice([-1,1])
 
         #region Define char stats....
         if char_type_enum == ENUM_CHARACTER_OGRE:
@@ -101,10 +109,10 @@ class Character:
 
             self.armor = 1
 
-            self.starting_combat_rank = ENUM_RANK_ENEMY_NEAR #debug only
+            self.starting_combat_rank = ENUM_RANK_PC_FAR #debug only
 
             self.accuracy = ENUM_AVERAGE_ACCURACY_SCORE-2 #Worse than average accuracy, only hits about 50% of the time, on average
-            self.evasion = ENUM_AVERAGE_EVASION_SCORE-1 #Worse than average evasion
+            self.evasion = ENUM_AVERAGE_EVASION_SCORE-2 #Worse than average evasion
 
             # Starting equipment:
             item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
@@ -112,7 +120,7 @@ class Character:
             item_to_equip = Item(ENUM_ITEM_POLICE_TRUNCHEON)
             self.equip_item(item_to_equip, -1, True)
             item_to_equip = Item(ENUM_ITEM_MACHINE_PISTOL)
-            self.equip_item(item_to_equip, -1, True)
+            self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_SHOTGUN)
             self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_POLICE_TRUNCHEON)
@@ -264,17 +272,17 @@ class Character:
             self.res_electric = -50
 
             #debug only:
-            self.starting_combat_rank = ENUM_RANK_PC_NEAR  # debug only
+            self.starting_combat_rank = ENUM_RANK_PC_FAR  # debug only
 
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_PRISONER_JUMPSUIT)
-            self.equip_item(item_to_equip, -1,True)
+            self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_LASER_PISTOL)
             self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_REVOLVER)
             self.add_item_to_backpack(item_to_equip, True)
-            item_to_equip = Item(ENUM_ITEM_FLAME_THROWER)
-            self.add_item_to_backpack(item_to_equip, True)
+            item_to_equip = Item(ENUM_ITEM_SUIT_MARINE)
+            self.equip_item(item_to_equip, -1,True)
             item_to_equip = Item(ENUM_ITEM_ASSAULT_RIFLE)
             self.add_item_to_backpack(item_to_equip, True)
             item_to_equip = Item(ENUM_ITEM_FLAME_THROWER)
@@ -301,7 +309,7 @@ class Character:
             self.dexterity = 2
             self.speed = 2
 
-            self.starting_combat_rank = ENUM_RANK_PC_NEAR  # debug only
+            self.starting_combat_rank = ENUM_RANK_PC_FAR  # debug only
 
             # Starting equipment
             item_to_equip = Item(ENUM_ITEM_FLAK_ARMOR)
@@ -526,6 +534,8 @@ class Character:
             self.sanity_max = 20
             self.speed = 8
 
+            self.combat_ai_preference = ENUM_AI_COMBAT_MELEE
+
             self.armor = 0
             self.evasion = 3
             self.res_fire = 0
@@ -554,6 +564,8 @@ class Character:
             self.res_gas = 100
             self.res_electric = 0
 
+            self.combat_ai_preference = ENUM_AI_COMBAT_MELEE
+
             self.speed = -1
             #debug:
             self.starting_combat_rank = ENUM_RANK_ENEMY_MIDDLE
@@ -576,11 +588,14 @@ class Character:
             self.res_gas = 100
             self.res_electric = 0
 
+            self.combat_ai_preference = ENUM_AI_COMBAT_RANGED
+
             self.speed = 3
             #debug:
-            self.starting_combat_rank = ENUM_RANK_ENEMY_FAR
+            self.starting_combat_rank = ENUM_RANK_ENEMY_NEAR
             # abilities
             self.add_ability(ENUM_ITEM_SPINE_PROJECTILE)
+            self.add_ability(ENUM_ITEM_DESPERATE_CLAW)
             #self.add_ability(ENUM_ITEM_SPINE_PROJECTILE_VENOMOUS)
             #self.add_ability(ENUM_ITEM_SPINE_PROJECTILE_INFECTED)
 
@@ -600,11 +615,14 @@ class Character:
             self.res_gas = 100
             self.res_electric = 0
 
+            self.combat_ai_preference = ENUM_AI_COMBAT_RANGED
+
             self.speed = 0
             #debug:
             self.starting_combat_rank = ENUM_RANK_ENEMY_FAR
             self.add_ability(ENUM_ITEM_ACID_SPIT)
             self.add_ability(ENUM_ITEM_ACID_CLOUD)
+            self.add_ability(ENUM_ITEM_DESPERATE_CLAW)
 
         #endregion for define char stats
 

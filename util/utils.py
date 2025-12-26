@@ -19,6 +19,30 @@ from models.room import Room
 
 
 #region Define help funcs and essential funcs
+
+def advance_or_withdraw_char(move_dir,combat_rank_list,cur_combat_char):
+    # Add to next rank in combat_rank_list
+    combat_rank_list[cur_combat_char.cur_combat_rank + move_dir].append(cur_combat_char)
+    # Remove from cur rank in combat_rank_list
+    combat_rank_list[cur_combat_char.cur_combat_rank].remove(cur_combat_char)
+    #Update rank:
+    cur_combat_char.cur_combat_rank += move_dir
+    #print results - whether a character is 'withdrawing' or 'advancing' depends upon their team perspective
+    if move_dir == -1:
+        if cur_combat_char.char_team_enum != ENUM_CHAR_TEAM_ENEMY:
+            print(f"{cur_combat_char.name} advances...\n")
+        else:
+            print(f"{cur_combat_char.name} withdraws...\n")
+    elif move_dir == 1:
+        if cur_combat_char.char_team_enum != ENUM_CHAR_TEAM_ENEMY:
+            print(f"{cur_combat_char.name} withdraws...\n")
+        else:
+            print(f"{cur_combat_char.name} advances...\n")
+    else:
+        print(f"advance_or_withdraw_char: move_dir != -1 or 1, something went wrong. move_dir == {move_dir}.")
+
+    return combat_rank_list
+
     #Simply returns true if either the ENUM_EQUIP_SLOT_RH or ENUM_EQUIP_SLOT_LH are found in equip_slot_list
 def check_equip_slot_list_for_rh_or_lh(equip_slot_list):
     for i in range(0,len(equip_slot_list)):

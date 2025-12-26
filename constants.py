@@ -1,6 +1,6 @@
 
 
-TOTAL_LINE_W = 140
+TOTAL_LINE_W = 130
 
 NIFFY_W = 26*2
 NIFFY_H = 26*2
@@ -128,8 +128,9 @@ ENUM_ITEM_ACID_SPIT = 52
 ENUM_ITEM_ACID_CLOUD = 53
 ENUM_ITEM_SPINE_PROJECTILE_INFECTED = 54
 ENUM_ITEM_ACID_SACK = 55
-
-ENUM_ITEM_TOTAL_ITEMS = 56
+ENUM_ITEM_DESPERATE_CLAW = 56
+ENUM_ITEM_SECURITY_VEST = 57
+ENUM_ITEM_TOTAL_ITEMS = 58
 
 ENUM_CHARACTER_MERCENARY_MECH = 0 #Sec - Comes equipped with built-in hand-flamer, laser, and wrist rockets which use ability points rather than ammunition.
 ENUM_CHARACTER_GAMER = 1 #Survivor - Hacker, gamer, a girl; only character that is small enough to use vents. Is better at hiding than other characters.
