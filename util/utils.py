@@ -20,6 +20,89 @@ from models.room import Room
 
 #region Define help funcs and essential funcs
 
+def resolve_dot_effects(char_id):
+
+    if char_id.burning_count > 0:
+        if not char_id.unconscious_boolean:
+            dmg_reduction = int(ENUM_DOT_FIRE * (char_id.res_fire * .01))
+            fire_dmg = ENUM_DOT_FIRE - dmg_reduction
+            if fire_dmg > 0:
+                char_id.hp_cur -= fire_dmg
+                #Cap:
+                if char_id.hp_cur < 0:
+                    char_id.hp_cur = 0
+                char_id.burning_count -= 1
+                print(f"... {char_id.name} is still burning for {fire_dmg} fire damage!... \n")
+        #Just clear their DOT stacks:
+        else:
+            char_id.burning_count = 0
+
+    if char_id.poisoned_count > 0:
+        if not char_id.unconscious_boolean:
+            poison_dmg = int(char_id.hp_max * .25)
+            dmg_reduction = int(poison_dmg * (char_id.res_poison * .01))
+            poison_dmg = poison_dmg - dmg_reduction
+            if poison_dmg > 0:
+                char_id.hp_cur -= poison_dmg
+                # Cap:
+                if char_id.hp_cur < 0:
+                    char_id.hp_cur = 0
+                char_id.poisoned_count -= 1
+                print(f"... {char_id.name} feels the poison coursing in their veins for {poison_dmg} poison damage!... \n")
+        # Just clear their DOT stacks:
+        else:
+            char_id.poisoned_count = 0
+
+    if char_id.inside_toxic_gas_boolean:
+        if not char_id.unconscious_boolean:
+            toxic_gas_dmg = int(char_id.hp_max * .25)
+            dmg_reduction = int(toxic_gas_dmg * (char_id.res_gas * .01))
+            toxic_gas_dmg = toxic_gas_dmg - dmg_reduction
+            if toxic_gas_dmg > 0:
+                char_id.hp_cur -= toxic_gas_dmg
+                # Cap:
+                if char_id.hp_cur < 0:
+                    char_id.hp_cur = 0
+                print(f"... {char_id.name} is choking on toxic fumes for {toxic_gas_dmg} damage!... \n")
+        # Don't take any additional damage while already unconscious:
+        else:
+            pass
+
+    if char_id.inside_vacuum_boolean:
+        if not char_id.unconscious_boolean:
+            vacuum_dmg = int(char_id.hp_max * .5)
+            dmg_reduction = int(vacuum_dmg * (char_id.res_vacuum * .01))
+            vacuum_dmg = vacuum_dmg - dmg_reduction
+            if vacuum_dmg > 0:
+                char_id.hp_cur -= vacuum_dmg
+                # Cap:
+                if char_id.hp_cur < 0:
+                    char_id.hp_cur = 0
+                print(f"... {char_id.name} is asphyxiating from the lack of oxygen, they have taken {toxic_gas_dmg} damage!... \n")
+        #Don't take any additional damage while already unconscious:
+        else:
+            pass
+
+    if char_id.unconscious_boolean:
+        char_id.unconscious_count -= 1
+
+    new_combat_char_killed_boolean = False
+    dot_result_str = "undefined"
+    if char_id.unconscious_boolean == False and char_id.hp_cur <= 0:
+        new_combat_char_killed_boolean = True
+        char_id.unconscious_boolean = True
+        char_id.unconscious_count = 3
+        dot_result_str = "has collapsed!"
+    elif char_id.unconscious_boolean and char_id.unconscious_count <= 0:
+        new_combat_char_killed_boolean = True
+        char_id.completely_dead_boolean = True
+        dot_result_str = "has gasped their last breath!"
+
+    if new_combat_char_killed_boolean:
+        print(f"**{char_id.name} {dot_result_str}**")
+
+    return new_combat_char_killed_boolean
+
 def build_overwatch_list(moving_char_id,combat_initiative_list):
     overwatch_attacker_list = []
     moving_char_team = moving_char_id.char_team_enum
@@ -34,20 +117,22 @@ def build_overwatch_list(moving_char_id,combat_initiative_list):
 
             if char_id.char_team_enum == ENUM_CHAR_TEAM_PC or char_id.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL:
 
-                if char_id.overwatch_rank == moving_char_id.cur_combat_rank and char_id.will_overwatch_boolean:
+                if (char_id.overwatch_rank == moving_char_id.cur_combat_rank and char_id.will_overwatch_boolean
+                        and not char_id.unconscious_boolean):
 
                     overwatch_attacker_list.append(char_id)
 
         elif moving_char_team == ENUM_CHAR_TEAM_PC or moving_char_team == ENUM_CHAR_TEAM_NEUTRAL:
 
             if (char_id.char_team_enum == ENUM_CHAR_TEAM_ENEMY and
-            char_id.overwatch_rank == moving_char_id.cur_combat_rank and char_id.will_overwatch_boolean):
+            char_id.overwatch_rank == moving_char_id.cur_combat_rank and char_id.will_overwatch_boolean and not char_id.unconscious_boolean):
 
                 overwatch_attacker_list.append(char_id)
 
     return overwatch_attacker_list
 
-#if check_overwatch_or_suppress_boolean == true: we check for overwatch; if false: we check for suppress.
+#region return_overwatch_or_suppress_capable: if check_overwatch_or_suppress_boolean == true: we check for overwatch;
+# if false: we check for suppress.
 #returns true if the specified wep ability is available; returns false otherwise
 def return_overwatch_or_suppress_capable(char_id,check_overwatch_or_suppress_boolean):
     for i in range(ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH+1):
@@ -63,6 +148,7 @@ def return_overwatch_or_suppress_capable(char_id,check_overwatch_or_suppress_boo
                     return True
     #print(f"Debug: return_overwatch_or_suppress_capable: check_overwatch_or_suppress_boolean == {check_overwatch_or_suppress_boolean}, returning FALSE")
     return False
+#endregion
 
 def advance_or_withdraw_char(move_dir,combat_rank_list,cur_combat_char):
     # Add to next rank in combat_rank_list
@@ -105,16 +191,26 @@ def check_equip_slot_list_for_rh_or_lh(equip_slot_list):
 #Returns TRUE if the combat has concluded
 def check_combat_end_condition(cur_combat_room_id):
 
+    combat_concluded_boolean = False
+    enemies_won_boolean = False
+
     if isinstance(cur_combat_room_id.enemies_in_room_list, list):
         if len(cur_combat_room_id.enemies_in_room_list) <= 0:
             print("The last enemy in this room has either fled or been killed!\n")
-            return True
+            combat_concluded_boolean = True
+            enemies_won_boolean = False
+
+            return combat_concluded_boolean, enemies_won_boolean
+
     if isinstance(cur_combat_room_id.pcs_in_room_list, list):
         if len(cur_combat_room_id.pcs_in_room_list) <= 0:
             print("The last friendly character in this room has either fled or been killed!\n")
-            return True
+            combat_concluded_boolean = True
+            enemies_won_boolean = True
 
-    return False
+            return combat_concluded_boolean, enemies_won_boolean
+
+    return combat_concluded_boolean, enemies_won_boolean
 
 def return_fists_enum(char_inst_id):
     if char_inst_id.char_type_enum == ENUM_CHARACTER_GAMER:
@@ -126,29 +222,42 @@ def return_fists_enum(char_inst_id):
 
     return fists_item_enum
 
-def destroy_combatant_inst(combat_rank_list, combat_initiative_list, filtered_enemy_list,destroyed_combatant_id,destroyed_combatant_rank_int,cur_combat_room_id, pc_char_list,enemy_char_list,neutral_char_list):
+def destroy_combatant_inst(combat_rank_list, combat_initiative_list,destroyed_combatant_id, pc_char_list,enemy_char_list,neutral_char_list):
+
     # Remove from combat_rank_list:
-    combat_rank_list[destroyed_combatant_rank_int].remove(destroyed_combatant_id)
+    for i in range(0,len(combat_rank_list)):
+        if isinstance(combat_rank_list[i],list):
+            try:
+                combat_rank_list[i].remove(destroyed_combatant_id)
+            except ValueError:
+                pass
+
     # Remove from combat_initiative_list:
-    combat_initiative_list.remove(destroyed_combatant_id)
-    # Remove from filtered_enemy_list:
-    filtered_enemy_list.remove(destroyed_combatant_id)
+    if destroyed_combatant_id in combat_initiative_list:
+        combat_initiative_list.remove(destroyed_combatant_id)
+
     # Remove from corresponding list in room:
-    if destroyed_combatant_id.char_team_enum == ENUM_CHAR_TEAM_PC:
+    destroyed_combatant_id.add_or_remove_char_from_room_list(destroyed_combatant_id.cur_room_id,False)
+
+    # Remove from our global lists: pc,enemy,neutral:
+    if destroyed_combatant_id in pc_char_list:
         pc_char_list.remove(destroyed_combatant_id)
-        cur_combat_room_id.pcs_in_room_list.remove(destroyed_combatant_id)
-    elif destroyed_combatant_id.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+    if destroyed_combatant_id in enemy_char_list:
         enemy_char_list.remove(destroyed_combatant_id)
-        cur_combat_room_id.enemies_in_room_list.remove(destroyed_combatant_id)
-    elif destroyed_combatant_id.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL:
+    if destroyed_combatant_id in neutral_char_list:
         neutral_char_list.remove(destroyed_combatant_id)
-        cur_combat_room_id.neutrals_in_room_list.remove(destroyed_combatant_id)
+
     #Not strictly necessary, but good practice:
     del destroyed_combatant_id
-    #Always need to return the globals:
-    return combat_rank_list, combat_initiative_list, filtered_enemy_list, pc_char_list, enemy_char_list,neutral_char_list
 
-def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_room_id,cur_combat_round, prev_index_for_cur_combat_char):
+    #Always need to return the globals:
+    return combat_rank_list, combat_initiative_list, pc_char_list, enemy_char_list,neutral_char_list
+
+def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_room_id,cur_combat_round, prev_index_for_cur_combat_char, called_from_str = "undefined"):
+    #Trace exactly when this function is being called:
+    debug_str = wrap_str(f"advance_combat_cur_char: called from: {called_from_str}",TOTAL_LINE_W,False)
+    print(debug_str)
+
     #Deliberately throw error is cur_combat_char is not even an instance of the char class:
     if isinstance(cur_combat_char,Character) == False:
         print(f"advance_combat_cur_char: ERROR: cur_combat_char did not even == an instance of Character. It == {cur_combat_char}. Throw error: {cur_combat_char.non_existant_attribute}")
@@ -188,6 +297,7 @@ def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_ro
     cur_combat_char.dodge_bonus_boolean = False
     cur_combat_char.will_suppress_boolean = False
     cur_combat_char.will_overwatch_boolean = False
+    cur_combat_char.resolve_dot_effects_boolean = True
 
     # Move to assign commands or execute ai
     if cur_combat_char.char_team_enum == ENUM_CHAR_TEAM_PC:

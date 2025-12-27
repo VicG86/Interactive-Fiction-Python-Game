@@ -9,10 +9,9 @@ import textwrap
 class Character:
 
     # region Constructor event for character stats:
-    def __init__(self, char_type_enum, spawn_grid_x, spawn_grid_y, spawn_grid, char_team_enum,add_to_room_list_boolean = True):
+    def __init__(self, char_type_enum, spawn_grid_x, spawn_grid_y, spawn_grid, char_team_enum,add_to_room_list_boolean):
 
         self.add_to_room_list_boolean = add_to_room_list_boolean
-        self.spawned_room_id = spawn_grid[spawn_grid_y][spawn_grid_x]
 
         # Default values for instance vars for this particularly character:
         self.strength = 0
@@ -43,6 +42,7 @@ class Character:
         self.res_vacuum = 0
         self.res_gas = 0
         self.res_electric = 0
+        self.res_poison = 0
 
         self.cur_action_points = 2
         self.max_action_points = 2
@@ -76,7 +76,8 @@ class Character:
             self.inv_list.append(-1)
 
         self.char_type_enum = char_type_enum
-        self.current_grid = spawn_grid
+        self.cur_grid = spawn_grid
+        self.cur_room_id = spawn_grid[spawn_grid_y][spawn_grid_x]
         self.cur_grid_x = spawn_grid_x
         self.cur_grid_y = spawn_grid_y
 
@@ -85,7 +86,19 @@ class Character:
         self.randomly_chosen_move_dir = random.choice([-1,1])
         self.overwatch_rank = -1
         self.will_overwatch_boolean = False
-        self.will_overwatch_boolean = False
+
+        self.burning_count = 0
+        self.poisoned_count = 0
+        self.bleeding_count = 0
+        self.unconscious_count = 0
+        self.inside_toxic_gas_boolean = False
+        self.inside_vacuum_boolean = False
+        self.healing_nanites_count = 0
+
+        self.resolve_dot_effects_boolean = True
+        self.healing_passive_boolean = False
+        self.unconscious_boolean = False
+        self.completely_dead_boolean = False
 
         #region Define char stats....
         if char_type_enum == ENUM_CHARACTER_OGRE:
@@ -629,9 +642,12 @@ class Character:
 
         #Call our method add_or_remove_char_from_room_list to add this char to the appropriate room list:
         if self.add_to_room_list_boolean:
-            self.add_or_remove_char_from_room_list(self.spawned_room_id,True)
+            self.add_or_remove_char_from_room_list(self.cur_room_id,True)
 
     # endregion
+
+    def update_cur_room_id(self):
+        self.cur_room_id = self.cur_grid[self.cur_grid_y][self.cur_grid_x]
 
     def print_char_inv(self):
 
@@ -937,7 +953,7 @@ class Character:
     def add_or_remove_char_from_room_list(self,room_id,add_boolean):
 
         if isinstance(room_id, Room):
-            #Find array to use:
+            #Find array to use - checks to make sure the appropriate list exists first- and if it doesn't, then it creates, then adds:
             if self.char_team_enum == ENUM_CHAR_TEAM_PC:
                 if not isinstance(room_id.pcs_in_room_list, list):
                     room_id.pcs_in_room_list = []
@@ -957,8 +973,7 @@ class Character:
 
             #Del element position from list:
             else:
-                for i in range(0,len(ar_to_use)):
-                    if isinstance(ar_to_use[i], Character) and ar_to_use[i] == self:
-                        del ar_to_use[i]
+                if self in ar_to_use:
+                    ar_to_use.remove(self)
         else:
             print(f"A non-Room object was fed to the method add_chars_to_room_list for Char with name: {self.name}")
