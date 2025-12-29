@@ -20,8 +20,70 @@ from models.room import Room
 
 #region Define help funcs and essential funcs
 
+def print_combat_initiative_list(combat_initiative_list,cur_char):
+    print("This is the order of the combat initiative queue:")
+    for i in range(0,len(combat_initiative_list)):
+        asterisk_str = ""
+        if combat_initiative_list[i] == cur_char:
+            asterisk_str = " *"
+        print(f"{i}.) {combat_initiative_list[i].name}{asterisk_str}")
+
+def apply_status_effects(char_id,item_id):
+
+    #Because char_id.status_res_list and item_id.status_effect_list match, we can iterate through them both simultaneously:
+    for i in range(0,len(item_id.status_effect_list)):
+
+        status_effect_str = ""
+
+        if item_id.status_effect_list[i] > 0 and char_id.status_res_list[i] < 100:
+            status_chance = item_id.status_effect_list[i] - char_id.status_res_list[i]
+            if status_chance > 0:
+                ran_val = random.randint(1,100)
+                print(
+                    f"DEBUG: apply_status_effects: attacker's item was: {item_id.item_name} with status effect: {status_effect_str}, status_chance: {status_chance} and ran_val = {ran_val}.")
+                if ran_val <= status_chance:
+                    #Define status_effect_str, as this status was applied:
+                    if i == ENUM_STATUS_EFFECT_POISON:
+                        status_effect_str = "POISONED"
+                        char_id.poisoned_count += 2 #Poison can stack, making it more dangerous than fire.
+                    elif i == ENUM_STATUS_EFFECT_INFECT:
+                        status_effect_str = "INFECTED"
+                        char_id.infection_count += 1 #Infection counters don't start to build until back into the main game state
+                    elif i == ENUM_STATUS_EFFECT_BLEED:
+                        status_effect_str = "BLEEDING"
+                        char_id.bleeding_count += 1 #Bleeding can stack
+                    elif i == ENUM_STATUS_EFFECT_STUN:
+                        #Already stunned characters can't get re-stunned:
+                        if char_id.stun_count <= 0:
+                            status_effect_str = "STUNNED"
+                            char_id.stun_count = 2 #Stun can't stack
+                            #Also reset some of their stats:
+                            char_id.dodge_bonus_boolean = False
+                            char_id.will_suppress_boolean = False
+                            char_id.will_overwatch_boolean = False
+                            char_id.overwatch_rank = -1
+                        else:
+                            continue
+                    elif i == ENUM_STATUS_EFFECT_COMPROMISE:
+                        status_effect_str = "COMPROMISED"
+                        char_id.stun_count = 1  # Compromise can't stack
+                    elif i == ENUM_STATUS_EFFECT_FIRE:
+                        status_effect_str = "BURNING"
+                        char_id.burning_count = 2 #Can't stack
+                    elif i == ENUM_STATUS_EFFECT_SUPPRESSED:
+                        if item_id.suppressive_fire_mode_enabled:
+                            status_effect_str = "SUPPRESSED (can't move, -2 evasion, -2 speed)"
+                            char_id.suppressed_count = 2  # Can't stack.
+                        else:
+                            continue
+
+                    print(f"{char_id.name} is {status_effect_str}!\n")
+
+
+
 def resolve_dot_effects(char_id):
 
+    #Fire:
     if char_id.burning_count > 0:
         if not char_id.unconscious_boolean:
             dmg_reduction = int(ENUM_DOT_FIRE * (char_id.res_fire * .01))
@@ -37,9 +99,28 @@ def resolve_dot_effects(char_id):
         else:
             char_id.burning_count = 0
 
+    #Bleeding - deal proportional damage:
+    if char_id.bleeding_count > 0:
+        if not char_id.unconscious_boolean:
+            bleed_dmg = int(char_id.hp_max * .25)
+            dmg_reduction = int(bleed_dmg * (char_id.res_bleed * .01))
+            bleed_dmg = bleed_dmg - dmg_reduction
+            if bleed_dmg > 0:
+                char_id.hp_cur -= bleed_dmg
+                # Cap:
+                if char_id.hp_cur < 0:
+                    char_id.hp_cur = 0
+                char_id.bleeding_count -= 1
+                print(
+                    f"... {char_id.name} is bleeding out for {bleed_dmg} damage!... \n")
+        # Just clear their DOT stacks:
+        else:
+            char_id.bleeding_count = 0
+
+    #Poisoned - deal static damage
     if char_id.poisoned_count > 0:
         if not char_id.unconscious_boolean:
-            poison_dmg = int(char_id.hp_max * .25)
+            poison_dmg = ENUM_DOT_POISON
             dmg_reduction = int(poison_dmg * (char_id.res_poison * .01))
             poison_dmg = poison_dmg - dmg_reduction
             if poison_dmg > 0:
@@ -53,6 +134,7 @@ def resolve_dot_effects(char_id):
         else:
             char_id.poisoned_count = 0
 
+    #Always deal damage if you have the boolean for it:
     if char_id.inside_toxic_gas_boolean:
         if not char_id.unconscious_boolean:
             toxic_gas_dmg = int(char_id.hp_max * .25)
@@ -68,6 +150,7 @@ def resolve_dot_effects(char_id):
         else:
             pass
 
+    #Always deal damage if you have the boolean for it:
     if char_id.inside_vacuum_boolean:
         if not char_id.unconscious_boolean:
             vacuum_dmg = int(char_id.hp_max * .5)
@@ -83,8 +166,39 @@ def resolve_dot_effects(char_id):
         else:
             pass
 
+    #Reduce by 1:
     if char_id.unconscious_boolean:
         char_id.unconscious_count -= 1
+
+    if char_id.suppressed_count > 0:
+        char_id.suppressed_count -= 1
+
+    mention_stun_recovery = False
+    if char_id.stun_count > 0:
+        char_id.stun_count -= 1
+        if char_id.stun_count <= 0:
+            mention_stun_recovery = True
+
+    #Resolve passive healing effects:
+    if char_id.healing_factor_boolean:
+        if char_id.healing_factor_cd <= 0:
+            if char_id.hp_cur < char_id.hp_max:
+                char_id.hp_cur += 1
+                print(f"... {char_id.name} has passively healed 1 hit point, due to their HEALING FACTOR.\n")
+            #Reset cd:
+            char_id.healing_factor_cd = 2
+        #Reduce cd
+        char_id.healing_factor_cd -= 1
+
+    #Check to see if char 'wakes up'
+    if char_id.hp_cur > 0 and char_id.unconscious_boolean:
+        char_id.unconscious_boolean = False
+        print(f"{char_id.name} has woken up!\n")
+        if isinstance(char_id.revived_dialogue_str_list, list):
+            ran_int = random.randint(0, len(char_id.revived_dialogue_str_list)-1)
+            wrapped_dialogue_str = wrap_str(char_id.revived_dialogue_str_list[ran_int],TOTAL_LINE_W,False)
+            print(wrapped_dialogue_str)
+            print("")
 
     new_combat_char_killed_boolean = False
     dot_result_str = "undefined"
@@ -97,6 +211,8 @@ def resolve_dot_effects(char_id):
         new_combat_char_killed_boolean = True
         char_id.completely_dead_boolean = True
         dot_result_str = "has gasped their last breath!"
+    elif mention_stun_recovery and char_id.hp_cur > 0:
+        print(f"**{char_id.name} is no longer stunned!**")
 
     if new_combat_char_killed_boolean:
         print(f"**{char_id.name} {dot_result_str}**")
@@ -293,11 +409,12 @@ def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_ro
         cur_combat_char = combat_initiative_list[cur_index + 1]
 
     #Now that the cur_combat_char has been defined, reset various 1-turn-only vars for them:
-    # Reset their dodge_bonus_boolean
     cur_combat_char.dodge_bonus_boolean = False
     cur_combat_char.will_suppress_boolean = False
     cur_combat_char.will_overwatch_boolean = False
+    cur_combat_char.overwatch_rank = -1
     cur_combat_char.resolve_dot_effects_boolean = True
+
 
     # Move to assign commands or execute ai
     if cur_combat_char.char_team_enum == ENUM_CHAR_TEAM_PC:
@@ -331,6 +448,21 @@ def return_accuracy_debuff(coord_1, coord_2,item_max_range):
     return accuracy_debuff
 
 def print_combat_ranks(combat_rank_list,show_distance_debuff = False, item_max_range = 0,acting_char_rank = 0):
+
+    #Create our overwatch_str_list, which lets us know who is targeting what rank with overwatch:
+        #Initialize a mirror of our combat_rank_list
+    overwatch_str_list = []
+    for i in range(0, len(combat_rank_list)):
+        if isinstance(combat_rank_list[i], list):
+            overwatch_str_list.append([])
+
+    #Fill overwatch_str_list with names from our combat_rank_list, in their corresponding positions:
+    for i in range(0, len(combat_rank_list)):
+        if isinstance(combat_rank_list[i], list):
+            for nested_i in range(0, len(combat_rank_list[i])):
+                char_id = combat_rank_list[i][nested_i]
+                if char_id.overwatch_rank >= 0:
+                    overwatch_str_list[char_id.overwatch_rank].append(char_id.name)
 
     for i in range(0, len(combat_rank_list)):
         rank_str = ""
@@ -369,6 +501,24 @@ def print_combat_ranks(combat_rank_list,show_distance_debuff = False, item_max_r
             rank_str += f" - accuracy change: {-accuracy_debuff}"
         """
 
+        #Add '*{OVERWATCH: {names of individual char overwatching this rank}; {another name}; etc*'
+        if isinstance(overwatch_str_list[i], list):
+            overwatch_str = "" #reset
+            title_initialized = False
+            for nested_i in range(0,len(overwatch_str_list[i])):
+                char_name = overwatch_str_list[i][nested_i]
+                if not title_initialized:
+                    title_initialized = True
+                    overwatch_str += " *OVERWATCHED:"
+                overwatch_str += f" {char_name}"
+                if nested_i != len(overwatch_str_list[i])-1:
+                    overwatch_str += ","
+                elif nested_i == len(overwatch_str_list[i])-1 and title_initialized:
+                    overwatch_str += "*"
+
+            #Add to rank_str:
+            rank_str += overwatch_str
+
         #Add ' *BEYOND WEAPON'S RANGE* ' to positions beyond this character's item.max_range:
         if show_distance_debuff and item_max_range != -1:
             dist_between_ranks = return_distance_between_ranks(acting_char_rank,i)
@@ -401,17 +551,17 @@ def fill_combat_initiative_list(room_inst_id):
     return combat_initiative_list
 
 #organize organize combat_rank_list by each char's starting_combat_rank:
-def organize_combat_rank_list(initiative_ar_to_pass):
+def organize_combat_rank_list(combat_initiative_list):
     #setup ranklist
     rank_list_to_return = []
     for i in range(0,ENUM_RANK_TOTAL_RANKS):
         rank_list_to_return.append([])
 
     for rank_i in range(0,len(rank_list_to_return)):
-        for char_i in range(0,len(initiative_ar_to_pass)):
-            combat_rank = initiative_ar_to_pass[char_i].starting_combat_rank
+        for char_i in range(0,len(combat_initiative_list)):
+            combat_rank = combat_initiative_list[char_i].starting_combat_rank
             if combat_rank == rank_i:
-                rank_list_to_return[combat_rank].append(initiative_ar_to_pass[char_i])
+                rank_list_to_return[combat_rank].append(combat_initiative_list[char_i])
 
     return rank_list_to_return
 
@@ -422,7 +572,10 @@ def organize_initiative_list(ar_to_pass):
     for i in range(0,len(ar_to_pass)):
         if isinstance(ar_to_pass[i],Character):
             char_inst = ar_to_pass[i]
-            char_inst.ran_init_val = random.randint(0,ENUM_MAX_RAN_INITIATIVE_VAL) + char_inst.speed
+            suppressed_debuff = 0
+            if char_inst.suppressed_count > 0:
+                suppressed_debuff = ENUM_SUPPRESSED_SPEED_DEBUFF
+            char_inst.ran_init_val = random.randint(0,ENUM_MAX_RAN_INITIATIVE_VAL) + char_inst.speed - suppressed_debuff
         else:
             print(f"organize_initiative_list: ar_to_pass[i]: {ar_to_pass[i]} was not an instance of Character, something went very wrong.")
             return False

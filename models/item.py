@@ -7,7 +7,7 @@ import textwrap
 class Item:
 
     # region Constructor event for item stats:
-    def __init__(self ,item_enum):
+    def __init__(self ,item_enum, suppressive_fire_mode_enabled = False):
 
         self.item_enum = item_enum
 
@@ -41,6 +41,18 @@ class Item:
         self.evade_bonus = 0
         self.shield_bonus = 0
 
+        self.fire_chance = 0
+        self.poison_chance = 0
+        self.bleed_chance = 0
+        self.stun_chance = 0
+        self.compromised_chance = 0
+        self.infection_chance = 0
+        self.suppress_chance = 0
+
+        self.suppressive_fire_mode_enabled = suppressive_fire_mode_enabled #This should only automatically be set as true for enemy-only items; for all other items that pcs can use, the default should be false.
+
+        self.always_checks_status_effect_boolean = False
+
         self.item_name = "Not defined"
         self.item_desc = "Not defined"
         self.item_dmg_str = "Not defined"
@@ -68,6 +80,8 @@ class Item:
             self.item_dmg_str = "shot"
             self.aoe_count = 3
             self.can_overwatch_boolean = True
+            self.bleed_chance = 25
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_REVOLVER:
             self.dmg_min = 1
             self.dmg_max = 4
@@ -77,16 +91,20 @@ class Item:
             self.item_verb = "fires the"
             self.item_dmg_str = "shot"
             self.can_overwatch_boolean = True
+            self.bleed_chance = 25
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_LASER_PISTOL:
             self.dmg_min = 1
             self.dmg_max = 3
             self.requires_ammo_boolean = False
-            self.item_name = "LASER PISTOL"
+            self.item_name = "PULSE PISTOL"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
             self.max_range = 3
             self.item_verb = "fires the"
             self.item_dmg_str = "burned"
             self.can_overwatch_boolean = True
+            self.burn_chance = 25
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_GRENADES:
             self.dmg_min = 4
             self.dmg_max = 8
@@ -96,6 +114,8 @@ class Item:
             self.item_verb = "tosses the"
             self.item_dmg_str = "shredded"
             self.aoe_count = 6
+            self.burn_chance = 25
+            self.bleed_chance = 25
         elif self.item_enum == ENUM_ITEM_FLAME_THROWER:
             self.dmg_min = 1
             self.dmg_max = 4
@@ -105,6 +125,7 @@ class Item:
             self.item_verb = "spews fire with the"
             self.item_dmg_str = "burned"
             self.aoe_count = -1
+            self.burn_chance = 75
         elif self.item_enum == ENUM_ITEM_ROCKET_LAUNCHER:
             self.dmg_min = 12
             self.dmg_max = 24
@@ -116,6 +137,8 @@ class Item:
             self.item_dmg_str = "exploded"
             self.aoe_count = -1
             self.can_overwatch_boolean = True
+            self.bleed_chance = 25
+            self.burn_chance = 50
         elif self.item_enum == ENUM_ITEM_LEAD_PIPE:
             self.dmg_min = 1
             self.dmg_max = 4
@@ -125,6 +148,7 @@ class Item:
             self.item_verb = "swings the"
             self.item_dmg_str = "blundgeoned"
             self.max_range = 0
+            self.stun_chance = 50
         elif self.item_enum == ENUM_ITEM_MONSTROUS_CLAW:
             self.dmg_min = 2
             self.dmg_max = 5
@@ -134,6 +158,7 @@ class Item:
             self.item_verb = "swipes with"
             self.item_dmg_str = "slashed"
             self.max_range = 0
+            self.bleed_chance = 50
         elif self.item_enum == ENUM_ITEM_LARVA_WRITHING_TENDRIL:
             self.dmg_min = 1
             self.dmg_max = 3
@@ -143,6 +168,7 @@ class Item:
             self.item_verb = "whips with a"
             self.item_dmg_str = "slashed"
             self.max_range = 0
+            self.compromised_chance = 100
         elif self.item_enum == ENUM_ITEM_DESPERATE_CLAW:
             self.dmg_min = 1
             self.dmg_max = 3
@@ -152,6 +178,7 @@ class Item:
             self.item_verb = "slashes with a"
             self.item_dmg_str = "slashed"
             self.max_range = 0
+            self.bleed_chance = 25
         elif self.item_enum == ENUM_ITEM_LARVA_INJECTION_BARB:
             self.dmg_min = 3
             self.dmg_max = 3
@@ -161,6 +188,7 @@ class Item:
             self.item_verb = "stabs with a"
             self.item_dmg_str = "punctured"
             self.max_range = 0
+            self.infection_chance = 100
         elif self.item_enum == ENUM_ITEM_POLICE_TRUNCHEON:
             self.dmg_min = 3
             self.dmg_max = 4
@@ -170,7 +198,8 @@ class Item:
             self.item_verb = "swings the"
             self.item_dmg_str = "blundgeoned"
             self.max_range = 0
-        elif self.item_enum == ENUM_ITEM_STUN_BATON: #Has a 50% chance of stunning enemies, minus their electric_res
+            self.stun_chance = 50
+        elif self.item_enum == ENUM_ITEM_STUN_BATON: #Has a 100% chance of stunning enemies, minus their electric_res
             self.dmg_min = 1
             self.dmg_max = 2
             self.requires_ammo_boolean = False
@@ -179,6 +208,7 @@ class Item:
             self.item_verb = "thrusts the"
             self.item_dmg_str = "zapped"
             self.max_range = 0
+            self.stun_chance = 100
         elif self.item_enum == ENUM_ITEM_FIRE_AXE:
             self.dmg_min = 2
             self.dmg_max = 5
@@ -188,6 +218,7 @@ class Item:
             self.item_verb = "swings the"
             self.item_dmg_str = "mauled"
             self.max_range = 0
+            self.bleed_chance = 25
         elif self.item_enum == ENUM_ITEM_TASER: #High stun chance, extra damage to characters with weak electric_res
             self.dmg_min = 1
             self.dmg_max = 1
@@ -196,11 +227,11 @@ class Item:
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
             self.item_verb = "fires the"
             self.item_dmg_str = "zapped"
-            self.max_range = 0
+            self.max_range = 1
+            self.stun_chance = 100
         elif self.item_enum == ENUM_ITEM_ASSAULT_RIFLE:
-            self.dmg_min = 5
-            self.dmg_max = 10
-            self.requires_ammo_boolean = 3
+            self.dmg_min = 2
+            self.dmg_max = 5
             self.item_name = "ASSAULT RIFLE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 3
@@ -208,6 +239,8 @@ class Item:
             self.item_dmg_str = "shot"
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
+            self.bleed_chance = 25
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_SPINE_PROJECTILE:
             self.dmg_min = 2
             self.dmg_max = 6
@@ -218,6 +251,9 @@ class Item:
             self.item_dmg_str = "shot"
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
+            self.bleed_chance = 25
+            self.infection_chance = 10
+            self.poison_chance = 10
         elif self.item_enum == ENUM_ITEM_SPINE_PROJECTILE_VENOMOUS:
             self.dmg_min = 1
             self.dmg_max = 4
@@ -238,6 +274,7 @@ class Item:
             self.item_dmg_str = "melted"
             self.aoe_count = 3
             self.can_overwatch_boolean = True
+            self.poison_chance = 50
         elif self.item_enum == ENUM_ITEM_ACID_CLOUD:
             self.dmg_min = 1
             self.dmg_max = 4
@@ -247,6 +284,57 @@ class Item:
             self.item_verb = "belches a massive"
             self.item_dmg_str = "melted"
             self.aoe_count = -1
+            self.poison_chance = 50
+            self.bleed_chance = 20
+            self.infection_chance = 20
+        elif self.item_enum == ENUM_ITEM_STICKY_SLIME:
+            self.dmg_min = 0
+            self.dmg_max = 1
+            self.item_name = "STICKY SLIME"
+            self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
+            self.max_range = 6
+            self.item_verb = "sprays"
+            self.item_dmg_str = "melted"
+            self.aoe_count = -1
+            self.can_suppress_boolean = True
+            self.suppress_chance = 75
+            self.always_checks_status_effect_boolean = True
+        elif self.item_enum == ENUM_ITEM_FILAMENT_SPRAY:
+            self.dmg_min = 0
+            self.dmg_max = 1
+            self.item_name = "FILAMENT SPRAY"
+            self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
+            self.max_range = 6
+            self.item_verb = "spits a massive"
+            self.item_dmg_str = "melted"
+            self.aoe_count = -1
+            self.can_suppress_boolean = True
+            self.infection_chance = 10
+            self.poison_chance = 20
+            self.stun_chance = 10
+            self.always_checks_status_effect_boolean = True
+        elif self.item_enum == ENUM_ITEM_TOXIC_GRENADE_LAUNCHER:
+            self.dmg_min = 1
+            self.dmg_max = 3
+            self.item_name = "TOXIC GRENADE LAUNCHER"
+            self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
+            self.max_range = 6 #Debug value
+            self.item_verb = "fires the"
+            self.item_dmg_str = "burned"
+            self.aoe_count = -1
+            self.poison_chance = 75
+            self.always_checks_status_effect_boolean = True
+        elif self.item_enum == ENUM_ITEM_CONCUSSION_GRENADE_LAUNCHER:
+            self.dmg_min = 0
+            self.dmg_max = 0
+            self.item_name = "CONCUSSION GRENADE LAUNCHER"
+            self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
+            self.max_range = 6 #Debug value
+            self.item_verb = "fires the"
+            self.item_dmg_str = "concussed"
+            self.aoe_count = -1
+            self.stun_chance = 100 #debug val
+            self.always_checks_status_effect_boolean = True
         elif self.item_enum == ENUM_ITEM_ACID_SACK: #Acts as a proximity mine
             self.dmg_min = 1
             self.dmg_max = 4
@@ -259,7 +347,6 @@ class Item:
         elif self.item_enum == ENUM_ITEM_SUB_MACHINE_GUN:
             self.dmg_min = 3
             self.dmg_max = 6
-            self.requires_ammo_boolean = 3
             self.item_name = "SUB MACHINE GUN"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
             self.max_range = 2
@@ -268,10 +355,11 @@ class Item:
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
             self.aoe_count = 3
+            self.bleed_chance = 25
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_MACHINE_PISTOL:
             self.dmg_min = 2
             self.dmg_max = 4
-            self.requires_ammo_boolean = 3
             self.item_name = "MACHINE PISTOL"
             self.equip_slot_list = [ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH] #Indicates either hand can equip
             self.max_range = 2
@@ -280,10 +368,11 @@ class Item:
             self.can_suppress_boolean = True
             self.can_overwatch_boolean = True
             self.aoe_count = 3
+            self.bleed_chance = 25
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_SNIPER_RIFLE:
             self.dmg_min = 10
             self.dmg_max = 15
-            self.requires_ammo_boolean = 1
             self.melee_debuff_boolean = True
             self.item_name = "SNIPER RIFLE"
             self.equip_slot_list = [[ENUM_EQUIP_SLOT_RH,ENUM_EQUIP_SLOT_LH]] #Indicates two-handed weapon
@@ -291,6 +380,9 @@ class Item:
             self.item_verb = "fires the"
             self.item_dmg_str = "shot"
             self.can_overwatch_boolean = True
+            self.can_suppress_boolean = True #Debug var
+            self.bleed_chance = 50
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_LASER_RIFLE:
             self.dmg_min = 6
             self.dmg_max = 10
@@ -304,6 +396,8 @@ class Item:
             self.can_overwatch_boolean = True
             self.can_suppress_boolean = True
             self.aoe_count = 2
+            self.burn_chance = 50
+            self.suppress_chance = 100
         elif self.item_enum == ENUM_ITEM_MEDKIT:
             self.single_use_boolean = True
             self.usable_boolean = True
@@ -443,6 +537,7 @@ class Item:
             self.item_verb = "punches with their"
             self.item_dmg_str = "battered"
             self.max_range = 0
+            self.stun_chance = 25
 
         #Define slot_designation_str - currently only using the Accessory string, print_inv gets too cluttered otherwise
         if isinstance(self.equip_slot_list,list):
@@ -456,6 +551,24 @@ class Item:
                 self.slot_designation_str = "Body"
 
         # endregion
+
+        #Build this item's 'status_effect_list':
+        self.status_effect_list = []
+        for i in range(0,ENUM_STATUS_EFFECT_TOTAL_EFFECTS):
+            if i == ENUM_STATUS_EFFECT_FIRE:
+                self.status_effect_list.append(self.fire_chance)
+            elif i == ENUM_STATUS_EFFECT_INFECT:
+                self.status_effect_list.append(self.infection_chance)
+            elif i == ENUM_STATUS_EFFECT_COMPROMISE:
+                self.status_effect_list.append(self.compromised_chance)
+            elif i == ENUM_STATUS_EFFECT_POISON:
+                self.status_effect_list.append(self.poison_chance)
+            elif i == ENUM_STATUS_EFFECT_BLEED:
+                self.status_effect_list.append(self.bleed_chance)
+            elif i == ENUM_STATUS_EFFECT_STUN:
+                self.status_effect_list.append(self.stun_chance)
+            elif i == ENUM_STATUS_EFFECT_SUPPRESSED:
+                self.status_effect_list.append(self.suppress_chance)
 
     def print_item_desc(self):
         print(f"print_item_desc method called for item with name: {self.item_name}")
