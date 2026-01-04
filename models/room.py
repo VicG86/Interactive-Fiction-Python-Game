@@ -19,7 +19,7 @@ class Room:
         self.unpowered_room_desc = "Not defined"
         self.powered_room_desc = "Not defined"
         self.scavenged_once_boolean = False
-        self.already_explored_boolean = False
+        self.already_explored_boolean = False #Determines whether or not we show the name and any enemies in that room when within the CHOOSE_DOOR_DIRECTION game state; if true, we do show all that.
 
         # keyword_interaction_dict - used for room feature keywords associated with this room
         self.keyword_interaction_dict = {}
@@ -59,7 +59,7 @@ class Room:
                 self.directional_dict["WEST"] = ENUM_DOOR_UNLOCKED
                 self.room_name = "NIFFY BASIC EW CORRIDOR"
             elif self.room_type_enum == ENUM_ROOM_NIFFY_STORAGE_ROOM:
-                self.cover = 2
+                self.cover_int = 2
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_TECH_BASIC] = random.randint(0 ,3)
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_TECH_ADVANCED] = 1
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_FOOD] = random.randint(0 ,2)
@@ -67,13 +67,13 @@ class Room:
                 self.unpowered_room_desc = [ "Racks of mostly empty shelving and opened boxes indicate that this room was once used for storage. Dust and debris are mostly all that remain. It looks as though the most important items have been pilfered already. The whirling red flare of the emergency lights overhead sends strange shadows pin-wheeling across the room." ]
                 self.room_name = "NIFFY STORAGE ROOM"
             elif self.room_type_enum == ENUM_ROOM_NIFFY_HYDROPONICS_LAB:
-                self.cover = 1
+                self.cover_int = 1
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_FOOD] = random.randint(0, 2)
                 self.unpowered_room_desc = [ "Rows and rows of metal grow boxes line the room, their contents nothing more than withered weeds to clutching to dry, gray dirt. There's a nest of hydraulics and hoses in the walls, and huge sunlamps are recessed in the ceiling, now dark and inert. If you can restore power to this room, perhaps there's a way to get these hydroponics working again?" ]
                 self.powered_room_desc = [ "The rows of hydroponics buzz happily with spray from the moisture pumps, while the leafy green vegetables within eagerly drink the light from the sunlamps overhead. These crops of potatoes, beans, and cabbages have clearly been genetically modified to grow quickly." ]
                 self.room_name = "NIFFY HYDRO LAB"
             elif self.room_type_enum == ENUM_ROOM_NIFFY_STASIS_CHAMBER:
-                self.cover = 1
+                self.cover_int = 1
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_TECH_BASIC] = 3
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_FOOD] = 15
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_AMMO] = 17
@@ -91,7 +91,7 @@ class Room:
                     "The cover of the service panel looks as though it was torn off with some haste, almost as though someone was determined to access these valves but soon abandoned their task; you can only speculate as to why."
                 ]
             elif self.room_type_enum == ENUM_ROOM_NIFFY_CORRIDOR_SR_WEST:
-                self.cover = 1
+                self.cover_int = 1
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_TECH_BASIC] = 1
                 self.room_name = "NIFFY SR CORRIDOR W"
 
@@ -105,7 +105,7 @@ class Room:
                     "The self-inflicted head wound, combined with the abyss where the man's stomach used to be, has certainly given you pause. Nonetheless, the CORPSE is carrying some useful looking gear, and there could be more in the pockets of his tactical vest. Is it wise to take a closer look?"
                 ]
             elif self.room_type_enum == ENUM_ROOM_NIFFY_CORRIDOR_SR_EAST:
-                self.cover = 1
+                self.cover_int = 1
                 self.scavenge_resource_list[ENUM_SCAVENGE_RESOURCE_TECH_BASIC] = 1
                 self.room_name = "NIFFY SR CORRIDOR E"
 
@@ -116,6 +116,14 @@ class Room:
                     "There's an NPC in this room."
                 ]
 
+            elif self.room_type_enum == ENUM_ROOM_VACUUM:
+
+                self.room_name = "VACUUM - OPEN SPACE"
+
+                self.unpowered_room_desc = [
+                    "The cold vacuum of space will kill even the strongest man in two turns."
+                ]
+
             else:
                 print \
                     (f"Constructor event for Room class: room_type_enum: {room_type_enum} not captured by if case for location_type_enum {location_type_enum}")
@@ -124,7 +132,7 @@ class Room:
         print("The following directions are available to you:")
 
         if len(self.directional_dict) > 0:
-            for key, value in self.directional_dict:
+            for key, value in self.directional_dict.items():
                 move_dir_x = 0
                 move_dir_y = 0
                 if key == "WEST":
@@ -148,11 +156,16 @@ class Room:
                     door_state_str = "OPEN SPACE"
 
                 room_name_str = ""
-                if self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].already_explored_boolean:
-                    room_name_str = ": "+self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].room_name
-                    if isinstance(self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].enemies_in_room_list,list):
-                        if len(self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].enemies_in_room_list) > 0:
-                            room_name_str += ": (...Enemies lurk here...)"
+                #This check is important, as grid locations that are VACUUM are not instantiated as a room.
+                if isinstance(self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x],Room):
+                    if self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].already_explored_boolean:
+                        room_name_str = ": "+self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].room_name
+
+                        if isinstance(self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].enemies_in_room_list,list):
+                            if len(self.location_grid[self.grid_y+move_dir_y][self.grid_x+move_dir_x].enemies_in_room_list) > 0:
+                                room_name_str += " (...Enemies lurk here...)"
+                    else:
+                        room_name_str = ": UNEXPLORED."
 
                 print(f"{key}: {door_state_str}{room_name_str}")
 

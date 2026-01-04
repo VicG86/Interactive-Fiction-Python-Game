@@ -20,20 +20,98 @@ from models.room import Room
 
 #region Define help funcs and essential funcs
 
+def remove_team_chars_from_room(room_id,team_enum):
+
+    if team_enum == ENUM_CHAR_TEAM_NEUTRAL:
+        if isinstance(room_id.neutrals_in_room_list, list):
+            if len(room_id.neutrals_in_room_list) > 0:
+                room_id.neutrals_in_room_list.clear()
+                return True
+    elif team_enum == ENUM_CHAR_TEAM_ENEMY:
+        if isinstance(room_id.enemies_in_room_list, list):
+            if len(room_id.enemies_in_room_list) > 0:
+                room_id.enemies_in_room_list.clear()
+                return True
+    elif team_enum == ENUM_CHAR_TEAM_PC:
+        if isinstance(room_id.pcs_in_room_list, list):
+            if len(room_id.pcs_in_room_list) > 0:
+                room_id.pcs_in_room_list.clear()
+                return True
+
+    return False
+
+#Only checks 1 dimensional lists:
+def return_first_team_member_in_list(list_to_check,team_enum):
+
+    if isinstance(list_to_check,list):
+        if len(list_to_check) > 0:
+            for i in range(0,len(list_to_check)):
+                if isinstance(list_to_check[i],Character):
+                    if list_to_check[i].char_team_enum == team_enum:
+                        return list_to_check[i]
+
+    return -1
+
+def execute_char_combat_flee(combat_initiative_list,combat_rank_list,cur_combat_room_id,fleeing_combat_char_id,fled_to_another_map_boolean):
+
+    if fled_to_another_map_boolean == False:
+
+        #switch boolean var:
+        fleeing_combat_char_id.already_fled_this_turn_boolean = True
+        #Delete from combat lists:
+        rank_pos = fleeing_combat_char_id.cur_combat_rank
+        combat_initiative_list.remove(fleeing_combat_char_id)
+        combat_rank_list[rank_pos].remove(fleeing_combat_char_id)
+        # Delete from curent room:
+        fleeing_combat_char_id.add_or_remove_char_from_room_list(cur_combat_room_id, False)
+        # Define next room:
+        next_room_id = fleeing_combat_char_id.cur_grid[fleeing_combat_char_id.cur_grid_y + fleeing_combat_char_id.fleeing_dir_y][
+            fleeing_combat_char_id.cur_grid_x + fleeing_combat_char_id.fleeing_dir_x]
+        # Add to next room:
+        fleeing_combat_char_id.add_or_remove_char_from_room_list(next_room_id, True)
+        #Change 'already explored' boolean in next room to == True
+        next_room_id.already_explored_boolean = True
+        #Important: Update our char's 'cur' vars:
+        fleeing_combat_char_id.cur_grid_x += fleeing_combat_char_id.fleeing_dir_x
+        fleeing_combat_char_id.cur_grid_y += fleeing_combat_char_id.fleeing_dir_y
+        fleeing_combat_char_id.cur_room_id = fleeing_combat_char_id.cur_grid[fleeing_combat_char_id.cur_grid_y][fleeing_combat_char_id.cur_grid_x]
+
+        #This will allow a new combat to begin in their next room:
+        fleeing_combat_char_id.participated_in_new_turn_battle = False
+
+        print(f"{fleeing_combat_char_id.name} has fled {fleeing_combat_char_id.flee_directional_str}...\n")
+
+    #We need to change this char's location_grid, but we haven't implemented any of that yet,
+    # so not sure how to proceed just yet:
+    elif fled_to_another_map_boolean:
+        print(f"fled_to_another_map_boolean == TRUE -- THIS FEATURE HASN'T BEEN IMPLEMENTED YET.")
+
+def return_valid_door_dir(room_id,dir_dict_key):
+
+    if isinstance(room_id,Room):
+        if dir_dict_key in room_id.directional_dict:
+            if (room_id.directional_dict[dir_dict_key] != ENUM_DOOR_LOCKED and
+            room_id.directional_dict[dir_dict_key] != ENUM_DOOR_JAMMED):
+                return True
+    else:
+        print(f"return_valid_door_dir: room_id: {room_id} was not an instance of Room, something went wrong.")
+    return False
+
 def return_combat_char_summary_string(cur_combat_char,ammo_total):
     # Use vars to account for things like adrenal pen and other abilities, which boost stats in combat only - they don't permanently boost the actual stat.
+    cur_char_infection = cur_combat_char.infection_count
     total_char_spd = cur_combat_char.speed
     total_char_acc = cur_combat_char.accuracy
     total_char_armor = cur_combat_char.armor
     total_char_evasion = cur_combat_char.evasion
     if cur_combat_char.shield_bonus_count > 0:
-        total_char_evasion += 2
-        total_char_armor += 2
+        total_char_evasion += ENUM_PERSONAL_SHIELD_BONUS
+        total_char_armor += ENUM_PERSONAL_SHIELD_BONUS
     if cur_combat_char.hold_the_line_count > 0:
-        total_char_evasion += 2
+        total_char_evasion += ENUM_HOLD_THE_LINE_EVADE_BONUS
     if cur_combat_char.adrenal_pen_count > 0:
-        total_char_spd += 2
-        total_char_acc += 2
+        total_char_spd += ENUM_ADRENAL_PEN_BONUS
+        total_char_acc += ENUM_ADRENAL_PEN_BONUS
     status_effects_str = return_status_effects_str(cur_combat_char)
     char_summary_str = wrap_str(f"You are {cur_combat_char.name}. "
                                 f"You have {cur_combat_char.hp_cur}/{cur_combat_char.hp_max} hit points, "
@@ -42,7 +120,8 @@ def return_combat_char_summary_string(cur_combat_char,ammo_total):
                                 f"{total_char_armor} armor, "
                                 f"{total_char_evasion} evasion, "
                                 f"{total_char_acc} accuracy, "
-                                f"and {total_char_spd} speed. "
+                                f"{total_char_spd} speed, "
+                                f"and {cur_char_infection}/{cur_combat_char.char_max_infection} infection points. "
                                 f"The party has {ammo_total} ammunition between them. {status_effects_str}",
                                 TOTAL_LINE_W, False)
 
@@ -72,7 +151,8 @@ def execute_non_attack_ability(item_id,casting_char_id,combat_initiative_list,co
 
     if abil_enum == ENUM_ITEM_PERSONAL_SHIELD_GENERATOR:
         casting_char_id.shield_bonus_count = 4
-        print(f"{casting_char_id.name} has activated their {item_id.item_name}. They will receive +2 armor and +2 evasion for 3 turns.\n")
+        casting_char_id.suppress_immune_boolean = True
+        print(f"{casting_char_id.name} has activated their {item_id.item_name}. They will receive +{ENUM_PERSONAL_SHIELD_BONUS} armor and +{ENUM_PERSONAL_SHIELD_BONUS} evasion for {casting_char_id.shield_bonus_count-1} turns.\n")
 
     elif abil_enum == ENUM_ITEM_HOLD_THE_LINE:
 
@@ -81,7 +161,7 @@ def execute_non_attack_ability(item_id,casting_char_id,combat_initiative_list,co
                     or combat_initiative_list[i].char_team_enum == ENUM_CHAR_TEAM_NEUTRAL):
                 combat_initiative_list[i].hold_the_line_count = 4
 
-        dialogue_str = wrap_str(f"'SMOKE OUT!' Cooper tosses a smoke grenade. (Party receives +2 evasion for 3 turns.)",TOTAL_LINE_W,False)
+        dialogue_str = wrap_str(f"'SMOKE OUT!' Cooper tosses a smoke grenade. (All friendly characters receive +{ENUM_HOLD_THE_LINE_EVADE_BONUS} evasion for {combat_initiative_list[i].hold_the_line_count-1} turns.)",TOTAL_LINE_W,False)
         print(dialogue_str)
         print("")
 
@@ -383,7 +463,16 @@ def print_combat_initiative_list(combat_initiative_list,cur_char):
         asterisk_str = ""
         if combat_initiative_list[i] == cur_char:
             asterisk_str = " *"
-        print(f"{i}.) {combat_initiative_list[i].name}{asterisk_str}")
+        unconscious_str = ""
+        if combat_initiative_list[i].unconscious_boolean:
+            plural_str = ""
+            if combat_initiative_list[i].unconscious_count-1 != 1:
+                plural_str = "s"
+            unconscious_str = f"-unconscious: {combat_initiative_list[i].unconscious_count-1} turn{plural_str} left-"
+        if combat_initiative_list[i].char_team_enum != ENUM_CHAR_TEAM_ENEMY:
+            print(f"{i}.) {combat_initiative_list[i].name}. H.P.:{combat_initiative_list[i].hp_cur}/{combat_initiative_list[i].hp_max}. {unconscious_str} {asterisk_str}")
+        else:
+            print(f"{i}.) {combat_initiative_list[i].name}")
 
 def apply_status_effects(char_id,item_id):
 
@@ -396,8 +485,8 @@ def apply_status_effects(char_id,item_id):
             status_chance = item_id.status_effect_list[i] - char_id.status_res_list[i]
             if status_chance > 0:
                 ran_val = random.randint(1,100)
-                print(
-                    f"DEBUG: apply_status_effects: attacker's item was: {item_id.item_name} with status effect: {status_effect_str}, status_chance: {status_chance} and ran_val = {ran_val}.")
+                #print(
+                    #f"DEBUG: apply_status_effects: attacker's item was: {item_id.item_name} with status effect enum: {i}, status_chance: {status_chance} and ran_val = {ran_val}.")
                 if ran_val <= status_chance:
                     #Define status_effect_str, as this status was applied:
                     if i == ENUM_STATUS_EFFECT_POISON:
@@ -421,14 +510,11 @@ def apply_status_effects(char_id,item_id):
                             char_id.overwatch_rank = -1
                         else:
                             continue
-                    elif i == ENUM_STATUS_EFFECT_COMPROMISE:
-                        status_effect_str = "COMPROMISED"
-                        char_id.stun_count = 1  # Compromise can't stack
                     elif i == ENUM_STATUS_EFFECT_FIRE:
                         status_effect_str = "BURNING"
                         char_id.burning_count = 2 #Can't stack
                     elif i == ENUM_STATUS_EFFECT_SUPPRESSED:
-                        if item_id.suppressive_fire_mode_enabled and char_id.suppress_immune_boolean == False:
+                        if char_id.suppress_immune_boolean == False:
                             status_effect_str = "SUPPRESSED (can't move, -2 evasion, -2 speed)"
                             char_id.suppressed_count = 2  # Can't stack.
                         else:
@@ -542,6 +628,7 @@ def resolve_dot_effects(char_id):
     if char_id.shield_bonus_count > 0:
         char_id.shield_bonus_count -= 1
         if char_id.shield_bonus_count <= 0:
+            char_id.suppress_immune_boolean = False
             print(f"{char_id.name}'s PERSONAL SHIELD GENERATOR has flickered off.\n")
 
     mention_stun_recovery = False
@@ -705,7 +792,7 @@ def check_combat_end_condition(cur_combat_room_id):
 
     if isinstance(cur_combat_room_id.pcs_in_room_list, list):
         if len(cur_combat_room_id.pcs_in_room_list) <= 0:
-            print("The last friendly character in this room has either fled or been killed!\n")
+            print("The last playable character in this room has either fled or been killed!\n")
             combat_concluded_boolean = True
             enemies_won_boolean = True
 
@@ -754,10 +841,11 @@ def destroy_combatant_inst(combat_rank_list, combat_initiative_list,destroyed_co
     #Always need to return the globals:
     return combat_rank_list, combat_initiative_list, pc_char_list, enemy_char_list,neutral_char_list
 
-def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_room_id,cur_combat_round, prev_index_for_cur_combat_char, called_from_str = "undefined"):
+def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_room_id,cur_combat_round, prev_index_for_cur_combat_char, called_from_str = "undefined",print_called_from_str = False):
     #Trace exactly when this function is being called:
-    debug_str = wrap_str(f"advance_combat_cur_char: called from: {called_from_str}",TOTAL_LINE_W,False)
-    print(debug_str)
+    if print_called_from_str:
+        debug_str = wrap_str(f"advance_combat_cur_char: called from: {called_from_str}",TOTAL_LINE_W,False)
+        print(debug_str)
 
     #Deliberately throw error is cur_combat_char is not even an instance of the char class:
     if isinstance(cur_combat_char,Character) == False:
@@ -769,13 +857,14 @@ def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_ro
     #If they died during the course of their turn (such as while withdrawing or advancing under overwatch),
     #then just use their previous index from when before they died as a reference:
     except ValueError:
-        print(f"Debug: advance_combat_cur_char: cur_index for the {cur_combat_char.name} could not be found, which means they were killed and deleted from the combat_init_list; therefore we're using the prev_index_for_cur_combat_char: {prev_index_for_cur_combat_char} as reference instead. We'll attempt to adjust it by - 1 and use it, or 0.")
+        #print(f"Debug: advance_combat_cur_char: cur_index for the {cur_combat_char.name} could not be found, which means they were killed and deleted from the combat_init_list; therefore we're using the prev_index_for_cur_combat_char: {prev_index_for_cur_combat_char} as reference instead. We'll attempt to adjust it by - 1 and use it, or 0.")
+
         #They were deleted from the list, so we need to adjust the cur_index appropriately:
-        if prev_index_for_cur_combat_char - 1 >= 0:
+        if prev_index_for_cur_combat_char - 1 >= 0 and prev_index_for_cur_combat_char - 1 < len(combat_initiative_list):
             cur_index = prev_index_for_cur_combat_char-1
         else:
             cur_index = 0
-        print(f"Debug: advance_combat_cur_char: cur_index now == {cur_index}. We had to adjust it b.c the {cur_combat_char.name} couldn't be found in the combat_init_list.")
+        #print(f"Debug: advance_combat_cur_char: cur_index now == {cur_index}. We had to adjust it b.c the {cur_combat_char.name} couldn't be found in the combat_init_list.")
 
     # check to see if we need to fill and reorganize the combat_initiative_list:
     if cur_index + 1 >= len(combat_initiative_list):
@@ -800,6 +889,7 @@ def advance_combat_cur_char(cur_combat_char,combat_initiative_list,cur_combat_ro
     cur_combat_char.overwatch_rank = -1
     cur_combat_char.resolve_dot_effects_boolean = True
     cur_combat_char.chosen_weapon = -1
+    cur_combat_char.is_opportunity_attacker_boolean = False
 
     # Move to assign commands or execute ai
     if cur_combat_char.char_team_enum == ENUM_CHAR_TEAM_PC:
@@ -915,12 +1005,9 @@ def print_combat_ranks(combat_rank_list,show_distance_debuff = False, item_max_r
         print(rank_str)
 
 def fill_combat_initiative_list(room_inst_id):
+
     combat_initiative_list = []
 
-    if isinstance(combat_initiative_list, list) == False:
-        combat_initiative_list = []
-    else:
-        combat_initiative_list.clear()
     if isinstance(room_inst_id.enemies_in_room_list,list):
         for enemy_i in range(0, len(room_inst_id.enemies_in_room_list)):
             combat_initiative_list.append(room_inst_id.enemies_in_room_list[enemy_i])
@@ -962,7 +1049,7 @@ def organize_initiative_list(ar_to_pass):
             if char_inst.suppressed_count > 0:
                 suppressed_debuff = ENUM_SUPPRESSED_SPEED_DEBUFF
             if char_inst.adrenal_pen_count > 0:
-                adrenal_pen_buff = 2
+                adrenal_pen_buff = ENUM_ADRENAL_PEN_BONUS
             char_inst.ran_init_val = random.randint(0,ENUM_MAX_RAN_INITIATIVE_VAL) + char_inst.speed - suppressed_debuff + adrenal_pen_buff
         else:
             print(f"organize_initiative_list: ar_to_pass[i]: {ar_to_pass[i]} was not an instance of Character, something went very wrong.")

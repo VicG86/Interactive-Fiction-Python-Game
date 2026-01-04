@@ -29,6 +29,8 @@ if __name__ == '__main__':
     prep_combat_boolean = False
     pc_fleeing_combat_boolean = False
 
+    fleeing_pc_id = -1
+    opportunity_attacker_id = -1
     cur_char = -1
     cur_char_index = 0
     cur_grid_to_use = -1
@@ -72,7 +74,7 @@ if __name__ == '__main__':
 
     # location grid for niffy:
     location_grid_niffy = [[0 for _ in range(NIFFY_W)] for _ in range(NIFFY_H)]
-    #Initialize each grid coordinate to -1
+    #Initialize each grid coordinate to ENUM_ROOM_VACUUM
     for yy in range(0,len(location_grid_niffy)):
         for xx in range(0,len(location_grid_niffy[yy])):
             location_grid_niffy[yy][xx] = ENUM_ROOM_VACUUM
@@ -81,80 +83,87 @@ if __name__ == '__main__':
     origin_grid_x = len(location_grid_niffy[0]) // 2
 
     location_grid_niffy[origin_grid_y][origin_grid_x] = Room(ENUM_LOCATION_NIFFY, ENUM_ROOM_NIFFY_STASIS_CHAMBER,origin_grid_x,origin_grid_y,location_grid_niffy)
+    location_grid_niffy[origin_grid_y][origin_grid_x].already_explored_boolean = True
     location_grid_niffy[origin_grid_y][origin_grid_x-1] = Room(ENUM_LOCATION_NIFFY,ENUM_ROOM_NIFFY_CORRIDOR_SR_WEST,origin_grid_x-1,origin_grid_y,location_grid_niffy)
     location_grid_niffy[origin_grid_y][origin_grid_x+1] = Room(ENUM_LOCATION_NIFFY,ENUM_ROOM_NIFFY_CORRIDOR_SR_EAST,origin_grid_x+1,origin_grid_y,location_grid_niffy)
+
+    #Iterate through again, Build 'vacuum' room to any coordinate with the corresponding enum:
+    for yy in range(0,len(location_grid_niffy)):
+        for xx in range(0,len(location_grid_niffy[yy])):
+            if location_grid_niffy[yy][xx] == ENUM_ROOM_VACUUM:
+                location_grid_niffy[yy][xx] = Room(ENUM_LOCATION_NIFFY, ENUM_ROOM_VACUUM, yy, xx, location_grid_niffy)
 
     #region Debug placeholder: Add some random enemies and neutral chars to the starting room:
         # char_type_enum, spawn_grid_x, spawn_grid_y, spawn_grid, char_team_enum
     debug_chars = True
     if debug_chars:
 
-        ammo_total += 15
+        ammo_total += 55
 
         #Neutral scientist
-        for i in range(0,1):
+        for i in range(1,1):
             neutral_char_list.append(Character(ENUM_CHARACTER_NEUTRAL_INFECTED_SCIENTIST,origin_grid_x,origin_grid_y,location_grid_niffy,
                                                ENUM_CHAR_TEAM_NEUTRAL,True))
 
         #Chittering lurker:
-        for i in range(0, random.randint(0, 0)): #1,4
+        for i in range(0, random.randint(4, 4)): #1,4
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_WEBBED_LURKER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY,True))
 
         #Spined Spitter
-        for i in range(0, random.randint(0, 0)): #1,3
+        for i in range(0, random.randint(12, 12)): #1,3
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SPINED_SPITTER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY,True))
 
         #Sodden Shambler
-        for i in range(0, random.randint(0, 0)): #1,3
+        for i in range(0, random.randint(8, 8)): #1,3
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SODDEN_SHAMBLER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY,True))
 
         #Lumbering mauler
-        for i in range(0, random.randint(0, 0)): #1,3
+        for i in range(0, random.randint(16, 16)): #1,3
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_LUMBERING_MAULER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY,True))
 
         #Skittering Larva
-        for i in range(0, random.randint(1, 1)): #1,3
+        for i in range(0, random.randint(24, 24)): #1,3
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_ENEMY_SKITTERING_LARVA, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_ENEMY,True))
 
         # Flamer droid:
-        for i in range(0, random.randint(0, 0)):
+        for i in range(0, random.randint(3, 3)):
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_NEUTRAL_FUMIGATING_FLAMER, origin_grid_x, origin_grid_y, location_grid_niffy,
                           ENUM_CHAR_TEAM_NEUTRAL, True))
 
         # Scattershot droid:
-        for i in range(0, random.randint(0, 0)):
+        for i in range(0, random.randint(4, 4)):
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_NEUTRAL_SPINNING_SCATTERSHOT, origin_grid_x, origin_grid_y,
                           location_grid_niffy,
                           ENUM_CHAR_TEAM_NEUTRAL, True))
 
         # Whipstich sentinel droid:
-        for i in range(0, random.randint(0, 0)):
+        for i in range(0, random.randint(3, 3)):
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_NEUTRAL_WHIPSTICH_SENTINEL, origin_grid_x, origin_grid_y,
                           location_grid_niffy,
                           ENUM_CHAR_TEAM_NEUTRAL, True))
 
         # Jittering buzzsaw droid:
-        for i in range(0, random.randint(0, 0)):
+        for i in range(0, random.randint(3, 3)):
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_NEUTRAL_JITTERING_BUZZSAW, origin_grid_x, origin_grid_y,
                           location_grid_niffy,
                           ENUM_CHAR_TEAM_NEUTRAL, True))
 
         # Light sentry drone:
-        for i in range(0, random.randint(0, 0)):
+        for i in range(0, random.randint(3, 3)):
             enemy_char_list.append(
                 Character(ENUM_CHARACTER_NEUTRAL_LIGHT_SENTRY_DRONE, origin_grid_x, origin_grid_y,
                           location_grid_niffy,
@@ -162,7 +171,7 @@ if __name__ == '__main__':
 
         # Transmogrified Soldier - overwatch type:
         wep_loadout_num = 0
-        for i in range(0,0): #0,9
+        for i in range(9,9): #0,9
             if i != 0 and i % 3 == 0:
                 wep_loadout_num += 1
             enemy_char_list.append(
@@ -321,7 +330,7 @@ if __name__ == '__main__':
                 print(char_stats_str)
                 print("")
 
-            user_input = input("Who will awaken?:").upper()
+            user_input = input("Who will awaken? >").upper()
             print("")
 
             if user_input == "BACK":
@@ -374,7 +383,7 @@ if __name__ == '__main__':
                         pc_char_list.append(Character(int_char,origin_grid_x,origin_grid_y,location_grid_niffy,ENUM_CHAR_TEAM_PC, True)) #instantiate char
                         print(f"You have added {pc_char_list[len(pc_char_list)-1].name} to the party.")
                         print("")
-                        if len(pc_char_list) == 3:
+                        if len(pc_char_list) == 7:
                             print("... Three silhouettes shamble from the stasis pods in the light of the bloody gloaming, the room quaking all around them...")
                             print("")
                             print("Through bleary eyes, you find yourself in the middle of a chaotic scene:")
@@ -382,12 +391,16 @@ if __name__ == '__main__':
                             #Define cur_char:
                             cur_char = pc_char_list[0]
                             #DEBUG ONLY: Add more chars and enemies:
-                            debug_features = True
+                            debug_features = False
                             if debug_features:
                                 #West hall:
                                 pc_char_list.append(Character(ENUM_CHARACTER_OGRE,origin_grid_x-1,origin_grid_y,location_grid_niffy,ENUM_CHAR_TEAM_PC,True))
                                 enemy_char_list.append(
                                     Character(ENUM_CHARACTER_ENEMY_SKITTERING_LARVA, origin_grid_x - 1, origin_grid_y, location_grid_niffy,
+                                              ENUM_CHAR_TEAM_ENEMY, True))
+                                enemy_char_list.append(
+                                    Character(ENUM_CHARACTER_ENEMY_SPINED_SPITTER, origin_grid_x + 1, origin_grid_y,
+                                              location_grid_niffy,
                                               ENUM_CHAR_TEAM_ENEMY, True))
                                 #East hall:
                                 pc_char_list.append(
@@ -397,9 +410,14 @@ if __name__ == '__main__':
                                     Character(ENUM_CHARACTER_ENEMY_SKITTERING_LARVA, origin_grid_x + 1, origin_grid_y,
                                               location_grid_niffy,
                                               ENUM_CHAR_TEAM_ENEMY, True))
+                                enemy_char_list.append(
+                                    Character(ENUM_CHARACTER_ENEMY_SPINED_SPITTER, origin_grid_x + 1, origin_grid_y,
+                                              location_grid_niffy,
+                                              ENUM_CHAR_TEAM_ENEMY, True))
 
                             #change game state to initialize new turn, if applicable:
                             enter_combat_boolean = check_combat_start(pc_char_list)
+
                             if enter_combat_boolean:
                                 cur_game_state = GAME_STATE_INITIALIZING_NEW_TURN
 
@@ -429,6 +447,11 @@ if __name__ == '__main__':
 
         elif cur_game_state == GAME_STATE_INITIALIZING_NEW_TURN:
 
+            #Just a failsafe for memory garbage collection:
+            opportunity_attacker_id = -1
+            overwatch_target_id = -1
+            overwatch_attacker_id = -1
+
             #Iterate through every pc char, if they have already participated in a battle and there's enemies in their
             #room, then start a battle:
             combat_begun = False
@@ -439,7 +462,8 @@ if __name__ == '__main__':
                 occupying_grid_id = pc_inst.cur_grid
                 cur_combat_room_id = occupying_grid_id[pc_inst.cur_grid_y][pc_inst.cur_grid_x]
 
-                if isinstance(cur_combat_room_id.enemies_in_room_list,list) and len(cur_combat_room_id.enemies_in_room_list) > 0:
+                if (isinstance(cur_combat_room_id.enemies_in_room_list,list)
+                and len(cur_combat_room_id.enemies_in_room_list) > 0):
                     if pc_inst.participated_in_new_turn_battle == False:
                         #Print discovery string:
                         combat_discovery_str = wrap_str(f"There are enemies in the {cur_combat_room_id.room_name} that have discovered {pc_inst.name}! You have no choice now--you have to fight to save yourself!",TOTAL_LINE_W,False)
@@ -499,6 +523,9 @@ if __name__ == '__main__':
             #Reset:
             choose_ability_boolean = False
             pc_fleeing_combat_boolean = False
+            pc_collapsed_from_dot = False
+            using_ability_boolean = False
+            choose_weapon_boolean = False
 
             #Print battlefield
             prep_phase_summary = wrap_str(
@@ -529,9 +556,14 @@ if __name__ == '__main__':
 
             #Goto CHOOSE_DOOR_DIR game state:
             if input_str == "R" or input_str == "RUN":
-                pc_fleeing_combat_boolean = True
-                prev_game_state = cur_game_state
-                cur_game_state = GAME_STATE_CHOOSE_DOOR_DIRECTION
+                if cur_combat_char.already_fled_this_turn_boolean == False:
+                    pc_fleeing_combat_boolean = True
+                    prev_game_state = GAME_STATE_PREP_COMBAT
+                    cur_game_state = GAME_STATE_CHOOSE_DOOR_DIRECTION
+                else:
+                    retreat_str = wrap_str(f"{cur_combat_char.name} is already exhausted from running. They can't retreat again!",TOTAL_LINE_W,False)
+                    print(retreat_str)
+                    print("")
 
             #Iterate through chars:
             elif input_str == "<" or input_str == ">":
@@ -552,10 +584,19 @@ if __name__ == '__main__':
                 cur_combat_char = playable_char_combat_list[cur_char_index]
 
             #region Goto CHOOSE_ATTACK screen:
-            elif input_str == "ABIL" or input_str == "ABILITY" or input_str == "A":
-                choose_ability_boolean = True
-                print("DEBUG: ABIL option chosen, moving to GAME_STATE_COMBAT_CHOOSE_ATTACK now.")
-                cur_game_state = GAME_STATE_COMBAT_CHOOSE_ATTACK
+            elif input_str == "ABIL" or input_str == "ABILITY":
+                valid_combat_abil = False
+                if isinstance(cur_combat_char.ability_list,list) and len(cur_combat_char.ability_list) > 0:
+                    for i in range(0,len(cur_combat_char.ability_list)):
+                        if cur_combat_char.ability_list[i].is_combat_abil_only_boolean == True:
+                            valid_combat_abil = True
+                            break
+                if valid_combat_abil:
+                    choose_ability_boolean = True
+                    #print(f"DEBUG: ABIL option chosen, moving to GAME_STATE_COMBAT_CHOOSE_ATTACK now, choose_weapon_boolean == {choose_weapon_boolean}, choose_ability_boolean {choose_ability_boolean}.")
+                    cur_game_state = GAME_STATE_COMBAT_CHOOSE_ATTACK
+                else:
+                    print(f"{cur_combat_char.name} has no valid combat abilities to use.\n")
             #endregion
 
             #Goto access inv screen:
@@ -584,6 +625,7 @@ if __name__ == '__main__':
 
         #endregion
 
+        #region game state choose door direction
         elif cur_game_state == GAME_STATE_CHOOSE_DOOR_DIRECTION:
             if pc_fleeing_combat_boolean:
                 print("Where will you flee to?\n")
@@ -595,9 +637,9 @@ if __name__ == '__main__':
             room_id.print_room_directions()
 
             if pc_fleeing_combat_boolean:
-                instruction_str = wrap_str("Enter the first letter or the full word of the direction you want to flee to, or 'B'ACK to return to the previous screen. Note: you can only flee once per turn--so if you run into more enemies you will be forced to fight them!",TOTAL_LINE_W,False)
+                instruction_str = wrap_str("Enter the first letter or the full word of the direction you want to flee to, or 'B'ACK to return to the previous screen. Note: you can only flee once per turn. If you flee into a room that also has enemies, you will be forced to fight them.",TOTAL_LINE_W,False)
                 print(instruction_str)
-                input_str = input("Enter your choice now. >").upper.strip()
+                input_str = input("Enter your choice now. >").upper().strip()
                 print("")
                 if (input_str == "W" or input_str == "WEST" or input_str == "E" or input_str == "N" or input_str == "NORTH"
                 or input_str == "S" or input_str == "SOUTH"):
@@ -605,27 +647,147 @@ if __name__ == '__main__':
                     move_dir_y = 0
                     if input_str == "W" or input_str == "WEST":
                         move_dir_x = -1
+                        input_str = "WEST"
                     elif input_str == "E" or input_str == "EAST":
                         move_dir_x = 1
+                        input_str = "EAST"
                     elif input_str == "S" or input_str == "SOUTH":
                         move_dir_y = 1
+                        input_str = "SOUTH"
                     elif input_str == "N" or input_str == "NORTH":
                         move_dir_y = -1
+                        input_str = "NORTH"
 
-                    #Im working here
+                    #Make sure that's a valid direction to travel to:
+                    if input_str in room_id.directional_dict:
+                        if return_valid_door_dir(room_id,input_str) == True:
+                            #Define fleeing vars
+                            fleeing_pc_id = cur_combat_char
+                            fleeing_pc_id.fleeing_dir_x = move_dir_x
+                            fleeing_pc_id.fleeing_dir_y = move_dir_y
+                            fleeing_pc_id.flee_directional_str = input_str
 
-                elif input_str == "B" or input_str == "BACK":
-                    if pc_fleeing_combat_boolean:
-                        cur_game_state = prev_game_state #Will be either PREP_COMBAT or ASSIGN_COMMAND game state
+
+                            #Check for enemies in current rank position:
+                            ran_enemy_list = []
+                            rank_pos = cur_combat_char.cur_combat_rank
+                            for nested_i in range(0,len(combat_rank_list[rank_pos])):
+                                char_id = combat_rank_list[rank_pos][nested_i]
+                                if char_id.char_team_enum == ENUM_CHAR_TEAM_ENEMY and char_id.stun_count <= 0:
+                                    ran_enemy_list.append(char_id)
+
+                            #Choose random enemy
+                            if len(ran_enemy_list) > 0:
+                                ran_ind = random.randint(0,len(ran_enemy_list)-1)
+                                opportunity_attacker_id = ran_enemy_list[ran_ind]
+                                opportunity_attacker_id.is_opportunity_attacker_boolean = True #Is reset to false in advance_cur_char and at the end of execute action
+
+                                #print(f"DEBUG: CHARACTER INITIATED FLEEING: fleeing_pc_id: {fleeing_pc_id.name}, opportunity_attacker_id = {opportunity_attacker_id.name}")
+
+                                #Choose weapon with max damage:
+                                random.shuffle(opportunity_attacker_id.ability_list)
+                                opportunity_attacker_id.ability_list.sort(key=attrgetter('dmg_max'), reverse=True)
+                                opportunity_attacker_id.chosen_weapon = opportunity_attacker_id.ability_list[0]
+
+                                #Print status:
+                                flee_str = wrap_str(f"{fleeing_pc_id.name} is attempting to flee {input_str}, but they are engaged in melee with an enemy! {opportunity_attacker_id.name} has an opportunity to attack...",TOTAL_LINE_W,False)
+                                print(flee_str)
+                                print("")
+
+                                #Move to combat (we'll skip enemy AI):
+                                cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
+
+                            #Move them right now, check for combat end, advance cur combat char:
+                            else:
+                                #Delete from both initiative list and combat_rank_list:
+                                pc_fleeing_combat_boolean = False #Reset
+                                prev_cur_combat_char_index = combat_initiative_list.index(cur_combat_char)
+                                execute_char_combat_flee(combat_initiative_list,combat_rank_list,cur_combat_room_id,fleeing_pc_id,False)
+
+                                combat_concluded, enemies_won_boolean = check_combat_end_condition(cur_combat_room_id)
+
+                                if combat_concluded:
+                                    overwatch_loop_mode_enabled = False  # Always reset
+                                    if not enemies_won_boolean:
+                                        prematurely_end_overwatch_mode = True
+                                        combat_begun = False  # reset
+                                        # Reset, clear our combat lists:
+                                        combat_initiative_list = -1
+                                        combat_rank_list = -1
+                                        overwatch_attacker_list = -1
+                                        cur_combat_char = -1
+
+                                        # Go back to our game_state GAME_STATE_INITIALIZING_NEW_TURN to see if other chars in other rooms will be attacked.
+                                        cur_game_state = GAME_STATE_INITIALIZING_NEW_TURN
+                                        continue_key = input(
+                                            "The battle is over! Every enemy has fled or been slain. Press enter to continue.")
+                                        print("")
+                                    elif enemies_won_boolean:
+                                        remove_team_chars_from_room(cur_combat_room_id, ENUM_CHAR_TEAM_NEUTRAL)
+                                        print(
+                                            "The battle is over! The enemies in this room cavort and slaver in the wake of their victory...\n")
+                                        if len(pc_char_list) <= 0:
+                                            print()
+                                            print(
+                                                "Every playable character is dead--you have lost! Hopefully you have learned from your experiences...")
+                                            game_end = True
+                                        else:
+                                            prematurely_end_overwatch_mode = True
+                                            # Reset, clear our combat lists:
+                                            combat_initiative_list = -1
+                                            combat_rank_list = -1
+                                            overwatch_attacker_list = -1
+                                            attacking_char = -1
+                                            defending_char = -1
+                                            cur_combat_char = -1
+                                            filtered_enemy_list = -1
+                                            # Go back to our game_state GAME_STATE_INITIALIZING_NEW_TURN to see if other chars in other rooms will be attacked.
+                                            cur_game_state = GAME_STATE_INITIALIZING_NEW_TURN
+                                            continue_key = input(
+                                                "Press enter to continue.")
+                                            print("")
+                                #either advance cur_Char (if our previous game_state == ASSIGN_COMMAND; or simply return to
+                                #the prev game state:
+                                elif not combat_concluded:
+                                    #This char has used their combat turn.
+                                    if prev_game_state == GAME_STATE_COMBAT_ASSIGN_COMMAND:
+                                        cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(
+                                            cur_combat_char,
+                                            combat_initiative_list,
+                                            cur_combat_room_id,
+                                            cur_combat_round,
+                                            prev_cur_combat_char_index,
+                                            f"moving away from GAME_STATE_CHOOSE_DOOR_DIRECTION game state, cur_combat_char: {cur_combat_char.name} was able to flee immediately without provoking an opportunity attack, advancing cur_char: combat has NOT concluded and this character has fled. Their prev_cur_combat_char_index var == {prev_cur_combat_char_index}.")
+
+                                        #Await player input:
+                                        continue_key = input(
+                                            "Press enter to continue to the next combatant in the initiative queue.")
+                                        print("")
+                                    #Simply change cur_char and return to our previous screen
+                                    else:
+                                        cur_combat_char = return_first_team_member_in_list(combat_initiative_list,ENUM_CHAR_TEAM_PC)
+                                        if cur_combat_char != -1:
+                                            cur_game_state = prev_game_state
+                                        else:
+                                            print("DEBUG: After char fled and was removed from combat lists, combat_concluded == False but we couldn't find another char with the TEAM_PC in our initiative_list... Something went wrong.")
+
+                        else:
+                            print("You must choose a valid direction that is accessible. Try again.")
                     else:
-                        cur_game_state = GAME_STATE_MAIN
+                        print("You must choose a valid direction that is accessible. Try again.")
+                elif input_str == "B" or input_str == "BACK":
+                    cur_game_state = prev_game_state
+                    pc_fleeing_combat_boolean = False
+                else:
+                    print("You must choose a valid direction that is accessible. Try again.")
+        #endregion
 
         #region GAME_STATE_COMBAT_ASSIGN_COMMAND GAME STATE
         elif cur_game_state == GAME_STATE_COMBAT_ASSIGN_COMMAND:
 
             if cur_combat_char.unconscious_boolean:
                 plural_str = ""
-                if cur_combat_char.unconscious_count > 1:
+                if cur_combat_char.unconscious_count != 1:
                     plural_str = "s"
                 status_str = wrap_str(f"**... {cur_combat_char.name} is unconscious with {cur_combat_char.hp_cur} hit points. They have {cur_combat_char.unconscious_count-1} turn{plural_str} left to be healed, otherwise they will die...** \n",TOTAL_LINE_W,False) #We subtract 1 here b.c they lose -1 and die on the same turn they reach 0, so it's more accurate to that the full turns they have remaining == unconscious_count-1
                 print(status_str)
@@ -648,6 +810,7 @@ if __name__ == '__main__':
             # Store in case the cur_char dies as a result of DOT damage:
             prev_cur_combat_char_index = combat_initiative_list.index(cur_combat_char)
 
+            #region Resolve DOT effects:
             #This ALSO catches the use-case where the pc is simply unconscious, but doesn't die from it and the game doesn't end.
             if cur_combat_char.resolve_dot_effects_boolean:
                 #Reset
@@ -662,7 +825,8 @@ if __name__ == '__main__':
                     #Delete pc if they are truly dead (not just unconscious):
                     if cur_combat_char.hp_cur <= 0 and cur_combat_char.completely_dead_boolean:
                         # Destroy the cur_combat_char pc by removing them from all applicable lists:
-                        print(f"Debug: before entering destroy_combatant_inst: the cur_combat_char's index in combat_initiative_list is : {combat_initiative_list.index(cur_combat_char)}.")
+                        #print(f"Debug: before entering destroy_combatant_inst: the cur_combat_char's index in combat_initiative_list is : {combat_initiative_list.index(cur_combat_char)}.")
+
                         combat_rank_list, combat_initiative_list, pc_char_list, enemy_char_list, neutral_char_list = destroy_combatant_inst(
                             combat_rank_list,
                             combat_initiative_list,
@@ -672,6 +836,7 @@ if __name__ == '__main__':
                         combat_concluded_boolean, enemies_won_boolean = check_combat_end_condition(cur_combat_room_id)
 
                         if combat_concluded_boolean:
+                            overwatch_loop_mode_enabled = False  # Always reset
                             if not enemies_won_boolean:
                                 prematurely_end_overwatch_mode = True
                                 combat_begun = False  # reset
@@ -686,8 +851,9 @@ if __name__ == '__main__':
                                 continue_key = input("The battle is over! Every enemy has fled or been slain. Press enter to continue.")
                                 print("")
                             elif enemies_won_boolean:
+                                remove_team_chars_from_room(cur_combat_room_id, ENUM_CHAR_TEAM_NEUTRAL)
                                 print(
-                                    "The battle is over! The enemies in this room cavort and slaver in the wake of their victory...\n")
+                                    "The battle is over! The enemies in this room slaver and cavort in the wake of their victory...\n")
                                 if len(pc_char_list) <= 0:
                                     print()
                                     print("Every playable character is dead--you have lost! Hopefully you have learned from your experiences...")
@@ -707,6 +873,7 @@ if __name__ == '__main__':
                                     continue_key = input(
                                         "Press enter to continue.")
                                     print("")
+            #endregion
 
             #Don't care whether DOT effects resolved or not, don't care if the char passed out from DOT effects.
             # All that matters here is if the combat is still running, and this char is either dead, unconscious, or stunned,
@@ -761,8 +928,17 @@ if __name__ == '__main__':
 
                 #region Choose ability:
                 if input_str == "ABIL" or input_str == "ABILITY":
-                    cur_game_state = GAME_STATE_COMBAT_CHOOSE_ATTACK
-                    choose_ability_boolean = True
+                    valid_combat_abil = False
+                    if isinstance(cur_combat_char.ability_list, list) and len(cur_combat_char.ability_list) > 0:
+                        for i in range(0, len(cur_combat_char.ability_list)):
+                            if cur_combat_char.ability_list[i].is_combat_abil_only_boolean == True:
+                                valid_combat_abil = True
+                                break
+                    if valid_combat_abil:
+                        cur_game_state = GAME_STATE_COMBAT_CHOOSE_ATTACK
+                        choose_ability_boolean = True
+                    else:
+                        print(f"{cur_combat_char.name} has no valid combat abilities.\n")
                 #endregion
 
                 #region FIGHT logic
@@ -805,11 +981,12 @@ if __name__ == '__main__':
                                     overwatch_loop_mode_enabled = True
                                     overwatch_target_id = cur_combat_char
                                     print(f"**{cur_combat_char.name} has been targeted for overwatch fire!**\n")
-                                    print(
-                                        f"Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
+                                    #print(
+                                        #f"DEBUG:Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
                             else:
                                 # Advance cur_combat_char (and possibly cur_combat_round):
                                 prev_cur_combat_char_index = combat_initiative_list.index(cur_combat_char)
+
                                 cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(cur_combat_char,
                                                                                                                                     combat_initiative_list,
                                                                                                                                     cur_combat_room_id,
@@ -818,7 +995,7 @@ if __name__ == '__main__':
                                                                                                                                     f"Moving away from ASSIGN_COMMANDS game state: pc_char: {cur_combat_char.name} just finished moving, moving away from this instance now; we called build_overwatch_list but overwatch_attacker_list return with a len(overwatch_attacker_list) <= 0, so we're not entering overwatch_loop and instead just advancing normally.")
                                 #EOF
                         else:
-                            print("You have been suppressed by enemy fire and cannot move!")
+                            print("You have been suppressed by enemy fire and cannot move!\n")
                     else:
                         print("You cannot move any further in that direction.")
                 #endregion
@@ -841,7 +1018,7 @@ if __name__ == '__main__':
                         f"Moving away from ASSIGN_COMMANDS game_state: pc char: {cur_combat_char.name} just finished entering their 'dodge' action.")
 
                     # Await player input before continuing:
-                    continue_str = input("Press enter to continue to the next combatant in the initiative queue.\n")
+                    continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
                     print("")
                 #endregion
 
@@ -875,9 +1052,17 @@ if __name__ == '__main__':
 
                 #region 'RUN' logic:
                 elif input_str == "R" or input_str == "RUN":
-                    pc_fleeing_combat_boolean = True
-                    prev_game_state = cur_game_state
-                    cur_game_state = GAME_STATE_CHOOSE_DOOR_DIRECTION
+                    if cur_combat_char.already_fled_this_turn_boolean == False:
+                        prev_game_state = GAME_STATE_COMBAT_ASSIGN_COMMAND
+                        pc_fleeing_combat_boolean = True
+                        prev_game_state = cur_game_state
+                        cur_game_state = GAME_STATE_CHOOSE_DOOR_DIRECTION
+                    else:
+                        retreat_str = wrap_str(
+                            f"{cur_combat_char.name} is already exhausted from running. They can't retreat again!",
+                            TOTAL_LINE_W, False)
+                        print(retreat_str)
+                        print("")
                 #endregion
 
                 else:
@@ -1006,7 +1191,7 @@ if __name__ == '__main__':
                                                         f"moving away from game_state GAME_STATE_COMBAT_CHOOSE_ATTACK: pc char: {cur_combat_char.name} just used an ability with non_attack_ability_boolean == True, and abil_passes_turn_boolean == True. It was: {ar_to_use[input_int].item_name}.")
 
                                                     continue_str = input(
-                                                        "Press enter to continue to the next combatant in the initiative queue.\n")
+                                                        "Press enter to continue to the next combatant in the initiative queue.")
                                                     print("")
 
                                             elif ar_to_use[input_int].non_attack_ability_boolean == False:
@@ -1115,14 +1300,14 @@ if __name__ == '__main__':
                                         prev_cur_combat_char_index,
                                         f"moving away from game_state TARGET_RANK: pc char: {cur_combat_char.name} just successfully targeted a rank with overwatch.")
 
-                                    continue_str = input("Press enter to continue to the next combatant in the initiative queue.\n")
+                                    continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
                                     print("")
 
                                 elif attempting_suppress_boolean:
                                     cur_combat_char.will_suppress_boolean = True
                                     # Print action message:
                                     overwatch_str = wrap_str(
-                                        f"**{cur_combat_char.name} has decided to use SUPPRESSIVE FIRE. They will consume twice the amount of ammunition and suffer a -2 accuracy penalty, but damaged enemies have a chance to become suppressed. Suppressed units can't withdraw or advance, and suffer -2 speed and -2 evasion for one turn.**\n",
+                                        f"**{cur_combat_char.name} has decided to use SUPPRESSIVE FIRE. They will consume twice the amount of ammunition and suffer a {ENUM_SUPPRESSIVE_FIRE_ACCURACY_DEBUFF} accuracy penalty, but damaged enemies have a chance to become suppressed that is equal to 100% - the defender's suppression resistence. Suppressed units can't withdraw or advance, and suffer -2 speed and -2 evasion for one turn.**\n",
                                         TOTAL_LINE_W, False)
                                     print(overwatch_str)
                                     print("")
@@ -1134,6 +1319,8 @@ if __name__ == '__main__':
                                     #Reduce AP, if applicable:
                                     if choose_ability_boolean:
                                         cur_combat_char.ability_points_cur -= cur_combat_char.chosen_weapon.ability_point_cost
+                                        if cur_combat_char.chosen_weapon.item_enum == ENUM_ITEM_TASER:
+                                            print("'TASER! TASER! TASER!'\n")
                                     #Move to fight phase:
                                     cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
                         else:
@@ -1150,8 +1337,9 @@ if __name__ == '__main__':
 
             char_killed_from_dot = False
 
-            #Define attacking_char based upon what game mode we're in:
-            if not overwatch_loop_mode_enabled:
+            #Don't resolve DOT if we're in overwatch loop mode or a pc is fleeing combat - in the latter case,
+            # they would have already had their DOT effects resolved at the start of their turn, in ASSIGN_COMMAND
+            if overwatch_loop_mode_enabled == False and pc_fleeing_combat_boolean == False:
                 #Define attacking char
                 attacking_char = cur_combat_char
 
@@ -1169,6 +1357,7 @@ if __name__ == '__main__':
                     if char_killed_from_dot:
                         # Store prev_index before we potentially kill off our pc:
                         prev_cur_combat_char_index = combat_initiative_list.index(cur_combat_char)
+
                         # Delete pc if they are truly dead (not just unconscious):
                         remove_from_memory_boolean = False
                         if (cur_combat_char.char_team_enum == ENUM_CHAR_TEAM_PC and cur_combat_char.hp_cur <= 0 and
@@ -1181,8 +1370,9 @@ if __name__ == '__main__':
                         #Destroy char instance, advance to next char inst in combat_init_list:
                         if remove_from_memory_boolean:
                             # Destroy the defender by removing them from all applicable lists:
-                            print(
-                                f"Debug: before entering destroy_combatant_inst: the cur_combat_char's index in combat_initiative_list is : {combat_initiative_list.index(cur_combat_char)}.")
+                            #print(
+                                #f"Debug: before entering destroy_combatant_inst: the cur_combat_char's index in combat_initiative_list is : {combat_initiative_list.index(cur_combat_char)}.")
+
                             combat_rank_list, combat_initiative_list, pc_char_list, enemy_char_list, neutral_char_list = destroy_combatant_inst(
                                 combat_rank_list,
                                 combat_initiative_list,
@@ -1193,7 +1383,8 @@ if __name__ == '__main__':
                             combat_concluded_boolean, enemies_won_boolean = check_combat_end_condition(cur_combat_room_id)
 
                             if combat_concluded_boolean:
-                                if not enemies_won_boolean:
+                                overwatch_loop_mode_enabled = False  # Always reset
+                                if enemies_won_boolean == False:
                                     prematurely_end_overwatch_mode = True
                                     # Reset, clear our combat lists:
                                     combat_initiative_list = -1
@@ -1209,6 +1400,7 @@ if __name__ == '__main__':
                                         "The battle is over! Every enemy has fled or been slain. Press enter to continue.")
                                     print("")
                                 elif enemies_won_boolean:
+                                    remove_team_chars_from_room(cur_combat_room_id, ENUM_CHAR_TEAM_NEUTRAL)
                                     print(
                                         "The battle is over! The enemies in this room cavort and slaver in the wake of their victory...\n")
                                     if len(pc_char_list) <= 0:
@@ -1217,6 +1409,11 @@ if __name__ == '__main__':
                                             "Every playable character has died--you have lost! Hopefully you learned a thing or two from your experiences...")
                                         game_end = True
                                     else:
+                                        #Go through our cur_combat_room_id and remove neutral Characters
+                                        # (it's assumed they all die if there's no pcs there to control/protect them)
+                                        remove_team_chars_from_room(cur_combat_room_id,ENUM_CHAR_TEAM_NEUTRAL)
+
+                                        cur_combat_room_id = -1
                                         prematurely_end_overwatch_mode = True
                                         # Reset, clear our combat lists:
                                         combat_initiative_list = -1
@@ -1245,16 +1442,22 @@ if __name__ == '__main__':
                             #endregion
                 #endregion
 
-            elif overwatch_loop_mode_enabled:
+            elif overwatch_loop_mode_enabled and pc_fleeing_combat_boolean == False:
                 attacking_char = overwatch_attacker_id
                 defending_char = overwatch_target_id
+
+            if pc_fleeing_combat_boolean:
+                attacking_char = opportunity_attacker_id
+                defending_char = fleeing_pc_id
+                attacking_char.enemy_ai_fight_boolean = True
+                print(f"DEBUG: CHARACTER ATTEMPTING TO FLEE BUT ENEMY GETS OPOPRTUNIY ATTACK: fleeing_pc_id: {defending_char.name}, attacking_char == {attacking_char.name}")
 
             # Check stunned print status, advance to next character
             # Enemies and neutrals will never be unconscious or have the 'dead completely' status because they're either
             # killed instantly in combat or removed from memory after resolve_dot_effects indicates that they died;
             # but enemies can be stunned. Also, if an enemy were to have died from DOT above, we would have caught it
             # already and moved on.
-            if attacking_char.stun_count > 0 and char_killed_from_dot == False:
+            if char_killed_from_dot == False and attacking_char.stun_count > 0:
                 plural_str = ""
                 if attacking_char.stun_count > 1:
                     plural_str = "s"
@@ -1265,7 +1468,10 @@ if __name__ == '__main__':
                 print("")
 
                 #Advance game_state and cur_char:
-                prev_cur_combat_char_index = combat_initiative_list.index(attacking_char)
+                if pc_fleeing_combat_boolean == False:
+                    prev_cur_combat_char_index = combat_initiative_list.index(attacking_char)
+                elif pc_fleeing_combat_boolean == True:
+                    prev_cur_combat_char_index = combat_initiative_list.index(defending_char)
 
                 cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(
                     attacking_char,
@@ -1280,6 +1486,8 @@ if __name__ == '__main__':
 
                 # We use prev_cur_combat_char_index in case the attacking_char dies during this combat,
                 # in which case 'combat_initiative_list.index(cur_combat_char) would throw an error; it's used in destroy_combatant_inst()
+                #debug_str = wrap_str(f"DEBUG: For line 1461: before assigning prev_cur_combat_char_index, overwatch_loop_mode_enabled = {overwatch_loop_mode_enabled}, pc_fleeing_combat_boolean = {pc_fleeing_combat_boolean}, attacking_char = {attacking_char.name}, their is_opportunity_attacker_boolean attribute = {attacking_char.is_opportunity_attacker_boolean}, and combat_initiative_list = {[Character.name for Character in combat_initiative_list]}",TOTAL_LINE_W,False)
+                #print(debug_str)
                 prev_cur_combat_char_index = combat_initiative_list.index(attacking_char)
 
                 #Print attacker:
@@ -1294,10 +1502,12 @@ if __name__ == '__main__':
                 # run through its AI again, which informs the player as to what the hell is going on (and makes debugging easier for me).
                 enemy_passed_turn_boolean = False
 
-                #region Enemy or Neutral AI code:
-                if not overwatch_loop_mode_enabled:
+                #region Enemy or Neutral AI code - we ignore AI in overwatch loop mode and pc_fleeing_combat - in which case the attacker's
+                # vars have already been defined, and they only need to attack:
+                #print(f"DEBUG: ABOUT TO EVALUATE WHETHER OR NOT ENEMY AI SHOULD EXECUTE: attacking_char: {attacking_char.name}, overwatch_loop_mode_enabled == {overwatch_loop_mode_enabled}, attacking_char.is_opportunity_attacker_boolean == {attacking_char.is_opportunity_attacker_boolean}")
+                if overwatch_loop_mode_enabled == False and attacking_char.is_opportunity_attacker_boolean == False:
 
-                    if attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY or attacking_char.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL:
+                    if (attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY or attacking_char.char_team_enum == ENUM_CHAR_TEAM_NEUTRAL):
 
                         #Some default values shared by all enemies/neutrals regardless of ai:
                             #Reset these vars:
@@ -1332,6 +1542,10 @@ if __name__ == '__main__':
                             # It's possible this could be 0, if only unconscious pcs or neutrals remain:
                             if len(nearest_target_list) > 0:
 
+                                # Randomize, sort positions in list:
+                                random.shuffle(nearest_target_list)
+                                nearest_target_list.sort(key=attrgetter('dist_to_enemy'))
+
                                 # Define our nearest pc rank as our target rank:
                                 attacking_char.targeted_rank = nearest_target_list[0].cur_combat_rank
 
@@ -1349,8 +1563,7 @@ if __name__ == '__main__':
                                     attacking_char.will_overwatch_boolean = True
 
                                     # Debug:
-                                    print(
-                                        f"Debug: stationary OVERWATCH AI: for {attacking_char.name} the distance between them and their target == {dist_between_target}, which is > to their ideal_target_range of: {ideal_abil_range}--but they have the ai_has_ranged_advantage, so they have decided to set overwatch on their max range rank instead.")
+                                    #print(f"Debug: stationary OVERWATCH AI: for {attacking_char.name} the distance between them and their target == {dist_between_target}, which is > to their ideal_target_range of: {ideal_abil_range}--but they have the ai_has_ranged_advantage, so they have decided to set overwatch on their max range rank instead.")
 
                                     # Print action message:
                                     overwatch_str = wrap_str(
@@ -1363,8 +1576,7 @@ if __name__ == '__main__':
 
                                     # Targeted rank has already been set, just move to fight:
                                     attacking_char.enemy_ai_fight_boolean = True
-                                    print(
-                                        f"Debug: stationary overwatch AI: for {attacking_char.name} the distance between them and their target == {dist_between_target}, which is less or <=>= to their ideal_target_range of: {ideal_abil_range}--AND the opposing team has the ranged advantage (there's no point withdrawing), so they have decided to attack.")
+                                    #print(f"Debug: stationary overwatch AI: for {attacking_char.name} the distance between them and their target == {dist_between_target}, which is less or <=>= to their ideal_target_range of: {ideal_abil_range}--AND the opposing team has the ranged advantage (there's no point withdrawing), so they have decided to attack.")
 
                             # Unable to build nearest target list: this means all applicable targets were unconscious:
                             elif len(nearest_target_list) <= 0:
@@ -1425,8 +1637,8 @@ if __name__ == '__main__':
                                     ai_has_ranged_advantage = True
 
                                 # Degbug:
-                                print(
-                                    f"Just called return_target_max_min_weapon_range; target_max_range = {target_max_range}, target_min_range == {target_min_range}; ai_has_ranged_advantage = {ai_has_ranged_advantage}.")
+                                #print(
+                                    #f"DEBUG:Just called return_target_max_min_weapon_range; target_max_range = {target_max_range}, target_min_range == {target_min_range}; ai_has_ranged_advantage = {ai_has_ranged_advantage}.")
 
                                 # Define our nearest pc rank as our target rank:
                                 attacking_char.targeted_rank = nearest_target_list[0].cur_combat_rank
@@ -1445,8 +1657,7 @@ if __name__ == '__main__':
                                     attacking_char.will_overwatch_boolean = True
 
                                     # Debug:
-                                    print(
-                                        f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is > to their ideal_target_range of: {ideal_abil_range}--but they have the ai_has_ranged_advantage, so they have decided to set overwatch on their max range rank instead.")
+                                    #print(f"Debug: Enemy OVERWATCH AI: for {attacking_char.name}: the distance between them and their target == {dist_between_target}, which is > to their ideal_target_range of: {ideal_abil_range}--but they have the ai_has_ranged_advantage, so they have decided to set overwatch on their max range rank instead.")
 
                                     # Print action message:
                                     overwatch_str = wrap_str(
@@ -1457,59 +1668,17 @@ if __name__ == '__main__':
 
                                 #Move closer - the nearest target is outside of our range, and we don't have the ranged advantage anyway:
                                 elif dist_between_target > ideal_abil_range and ai_has_ranged_advantage == False:
-                                    #Target is north of us - move north:
-                                    if attacking_char.cur_combat_rank > attacking_char.targeted_rank:
-                                        move_dir = -1
-                                    #Target is south of us - move south
-                                    elif attacking_char.cur_combat_rank < attacking_char.targeted_rank:
-                                        move_dir = 1
 
-                                    # Debug:
-                                    print(
-                                        f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is > to their ideal_target_range of: {ideal_abil_range}--and we do NOT have the ranged advantage, so they have decided to move.")
+                                    if attacking_char.suppressed_count <= 0:
+                                        #Target is north of us - move north:
+                                        if attacking_char.cur_combat_rank > attacking_char.targeted_rank:
+                                            move_dir = -1
+                                        #Target is south of us - move south
+                                        elif attacking_char.cur_combat_rank < attacking_char.targeted_rank:
+                                            move_dir = 1
 
-                                    # Move:
-                                    combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
-                                                                                attacking_char)
-
-                                    # After advancing, build our overwatch list:
-                                    overwatch_attacker_list = build_overwatch_list(attacking_char,
-                                                                                   combat_initiative_list)
-
-                                    # Move to GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST, if applicable:
-                                    if len(overwatch_attacker_list) > 0:
-                                        cur_game_state = GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST
-                                        cur_overwatch_attacker_index = 0
-                                        overwatch_loop_mode_enabled = True
-                                        overwatch_target_id = attacking_char
-                                        print(
-                                            f"**The {attacking_char.name} has been targeted for overwatch fire!**\n")
-                                        print(
-                                            f"Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
-
-                                #elif dist_to_target <= their max_range and enemy_has_ranged_adavantage == False:
-                                #We might as well fire on our target -- withdrawing wouldn't do us any good as the opposing team has the ranged advantage anyway:
-                                elif dist_between_target <= ideal_abil_range and ai_has_ranged_advantage == False:
-                                    # Targeted rank has already been set, just move to fight:
-                                    attacking_char.enemy_ai_fight_boolean = True
-                                    print(
-                                        f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is less or <=>= to their ideal_target_range of: {ideal_abil_range}--AND the opposing team has the ranged advantage (there's no point withdrawing), so they have decided to attack.")
-
-                                #Withdraw, if able, because we have the ranged advantage over the enemy, and could therefore use overwatch next turn.
-                                elif dist_between_target <= ideal_abil_range and ai_has_ranged_advantage == True:
-
-                                    #Regardles of whether we're north, south, or == to the target, 'withdraw':
-                                    if attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
-                                        move_dir = -1
-                                    else:
-                                        move_dir = 1
-
-                                    #Check to see if we can withdraw:
-                                    if attacking_char.cur_combat_rank+move_dir >= 0 and attacking_char.cur_combat_rank+move_dir < len(combat_rank_list):
-                                        #We can, so do so:
                                         # Debug:
-                                        print(
-                                            f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is <= to their ideal_target_range of: {ideal_abil_range}--and we DO have the ranged advantage AND are able to withdraw, so they have decided to withdraw now.")
+                                        #print(f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is > to their ideal_target_range of: {ideal_abil_range}--and we do NOT have the ranged advantage, so they have decided to move.")
 
                                         # Move:
                                         combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
@@ -1527,18 +1696,86 @@ if __name__ == '__main__':
                                             overwatch_target_id = attacking_char
                                             print(
                                                 f"**The {attacking_char.name} has been targeted for overwatch fire!**\n")
-                                            print(
-                                                f"Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
+                                            #print(
+                                                #f"DEBUG: Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
 
-                                    #We can't withdraw any further, just attack:
+                                    #Attacker is suppressed - just use overwatch, as it's better than just standing here and doing nothing.
+                                    else:
+                                        rank_pos = return_overwatch_rank(attacking_char, combat_rank_list,
+                                                                         ideal_abil_range)
+
+                                        # Define boolean var and the rank they are targeting for overwatch:
+                                        attacking_char.overwatch_rank = rank_pos
+                                        attacking_char.will_overwatch_boolean = True
+
+                                        # Debug:
+                                        #print(f"Debug: Enemy OVERWATCH AI: for {attacking_char.name}: the distance between them and their target == {dist_between_target}, which is > to their ideal_target_range of: {ideal_abil_range}; they do NOT have the ranged advantage and want to advance but are suppressed, so they have decided to set overwatch on their max range rank instead.")
+
+                                        # Print action message:
+                                        overwatch_str = wrap_str(
+                                            f"{attacking_char.name} has carefully aimed their {attacking_char.chosen_weapon.item_name} at rank position {attacking_char.overwatch_rank}, and is patiently waiting for any new enemy to move into this rank...\n",
+                                            TOTAL_LINE_W, False)
+                                        print(overwatch_str)
+                                        print("")
+
+                                #elif dist_to_target <= their max_range and enemy_has_ranged_adavantage == False:
+                                #We might as well fire on our target -- withdrawing wouldn't do us any good as the opposing team has the ranged advantage anyway:
+                                elif dist_between_target <= ideal_abil_range and ai_has_ranged_advantage == False:
+                                    # Targeted rank has already been set, just move to fight:
+                                    attacking_char.enemy_ai_fight_boolean = True
+                                    #print(
+                                        #f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is less or <=>= to their ideal_target_range of: {ideal_abil_range}--AND the opposing team has the ranged advantage (there's no point withdrawing), so they have decided to attack.")
+
+                                #Withdraw, if able, because we have the ranged advantage over the enemy, and could therefore use overwatch next turn.
+                                elif dist_between_target <= ideal_abil_range and ai_has_ranged_advantage == True:
+
+                                    if attacking_char.suppressed_count <= 0:
+
+                                        #Regardles of whether we're north, south, or == to the target, 'withdraw':
+                                        if attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                                            move_dir = -1
+                                        else:
+                                            move_dir = 1
+
+                                        #Check to see if we can withdraw:
+                                        if attacking_char.cur_combat_rank+move_dir >= 0 and attacking_char.cur_combat_rank+move_dir < len(combat_rank_list):
+                                            #We can, so do so:
+                                            # Debug:print(f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is <= to their ideal_target_range of: {ideal_abil_range}--and we DO have the ranged advantage AND are able to withdraw, so they have decided to withdraw now.")
+
+                                            # Move:
+                                            combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
+                                                                                        attacking_char)
+
+                                            # After advancing, build our overwatch list:
+                                            overwatch_attacker_list = build_overwatch_list(attacking_char,
+                                                                                           combat_initiative_list)
+
+                                            # Move to GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST, if applicable:
+                                            if len(overwatch_attacker_list) > 0:
+                                                cur_game_state = GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST
+                                                cur_overwatch_attacker_index = 0
+                                                overwatch_loop_mode_enabled = True
+                                                overwatch_target_id = attacking_char
+                                                print(
+                                                    f"**The {attacking_char.name} has been targeted for overwatch fire!**\n")
+                                                #print(
+                                                    #f"DEBUG: Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
+
+                                        #We can't withdraw any further, just attack:
+                                        else:
+                                            # Targeted rank has already been set, just move to fight:
+                                            attacking_char.enemy_ai_fight_boolean = True
+                                            if dist_between_target == 0:
+                                                attacking_char.chosen_weapon = alternate_weapon_id
+                                            #print(f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is <= to their ideal_target_range of: {ideal_abil_range}--and we DO have the ranged advantage but are NOT able to withdraw (against wall), so they have decided to attack now -- possibly with their alternate weapon if dist_between_target == 0.")
+
+                                    #We're suppressed and target is within range, just fire
                                     else:
                                         # Targeted rank has already been set, just move to fight:
                                         attacking_char.enemy_ai_fight_boolean = True
                                         if dist_between_target == 0:
                                             attacking_char.chosen_weapon = alternate_weapon_id
-                                        print(
-                                            f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is <= to their ideal_target_range of: {ideal_abil_range}--and we DO have the ranged advantage but are NOT able to withdraw (against wall), so they have decided to attack now -- possibly with their alternate weapon if dist_between_target == 0.")
-
+                                        #print(f"Debug: Enemy OVERWATCH AI: for {attacking_char.name} cur_combat_round > 0: the distance between them and their target == {dist_between_target}, which is <= to their ideal_target_range of: {ideal_abil_range}--and we DO have the ranged advantage but are NOT able to withdraw (against wall), so they have decided to attack now -- possibly with their alternate weapon if dist_between_target == 0.")
 
                             # Unable to build nearest target list: this means all applicable targets were unconscious:
                             elif len(nearest_target_list) <= 0:
@@ -1591,43 +1828,67 @@ if __name__ == '__main__':
                                 attacking_char.targeted_rank = nearest_target_list[0].cur_combat_rank
 
                                 #Show debug:
-                                print(
-                                    f"Debug: Enemy AI: {attacking_char.name} determined that the rank {attacking_char.targeted_rank} was the rank in which the closest pc to them resides."
-                                    f"Their enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
+                                #print(
+                                    #f"Debug: Enemy AI: {attacking_char.name} determined that the rank {attacking_char.targeted_rank} was the rank in which the closest pc to them resides."
+                                    #f"Their enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
 
                                 # Calculate dist between cur_rank and the rank we've targeted:
                                 dist_between_target = return_distance_between_ranks(attacking_char.targeted_rank, attacking_char.cur_combat_rank)
                                 #Show debug:
-                                print(
-                                    f"Debug: Enemy AI: {attacking_char.name} the distance between them (their current rank = {attacking_char.cur_combat_rank}) and their chosen rank was: {dist_between_target}.")
+                                #print(
+                                    #f"Debug: Enemy AI: {attacking_char.name} the distance between them (their current rank = {attacking_char.cur_combat_rank}) and their chosen rank was: {dist_between_target}.")
 
                                 #If we're not within range, move within range, it's that simple; these types of units move like crazed berserkers:
                                 if dist_between_target > ideal_abil_range:
-                                    # Target is NORTH of you - move north to move closer to it:
-                                    if attacking_char.cur_combat_rank > attacking_char.targeted_rank:
-                                        move_dir = -1
 
-                                    # Target is SOUTH of you - move south to move closer to it:
-                                    elif attacking_char.cur_combat_rank < attacking_char.targeted_rank:
-                                        move_dir = 1
+                                    if attacking_char.suppressed_count <= 0:
+                                        # Target is NORTH of you - move north to move closer to it:
+                                        if attacking_char.cur_combat_rank > attacking_char.targeted_rank:
+                                            move_dir = -1
 
-                                    #Move:
-                                    combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
-                                                                                attacking_char)
+                                        # Target is SOUTH of you - move south to move closer to it:
+                                        elif attacking_char.cur_combat_rank < attacking_char.targeted_rank:
+                                            move_dir = 1
 
-                                    # After advancing, build our overwatch list:
-                                    overwatch_attacker_list = build_overwatch_list(attacking_char,
-                                                                                   combat_initiative_list)
+                                        #Move:
+                                        combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
+                                                                                    attacking_char)
 
-                                    # Move to GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST, if applicable:
-                                    if len(overwatch_attacker_list) > 0:
-                                        cur_game_state = GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST
-                                        cur_overwatch_attacker_index = 0
-                                        overwatch_loop_mode_enabled = True
-                                        overwatch_target_id = attacking_char
-                                        print(f"**The {attacking_char.name} has been targeted for overwatch fire!**\n")
-                                        print(
-                                            f"Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
+                                        # After advancing, build our overwatch list:
+                                        overwatch_attacker_list = build_overwatch_list(attacking_char,
+                                                                                       combat_initiative_list)
+
+                                        # Move to GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST, if applicable:
+                                        if len(overwatch_attacker_list) > 0:
+                                            cur_game_state = GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST
+                                            cur_overwatch_attacker_index = 0
+                                            overwatch_loop_mode_enabled = True
+                                            overwatch_target_id = attacking_char
+                                            print(f"**The {attacking_char.name} has been targeted for overwatch fire!**\n")
+                                            #print(
+                                                #f"DEBUG: Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
+
+                                    #Melee unit has no alternative when suppressed--they have to pass their turn
+                                    else:
+                                        print(f"{attacking_char.name} struggles to advance, but can't find an opening. They've been suppressed by enemy fire!\n")
+
+                                        # Set var so the next enemy instance doesn't just instantly move to FIGHT code without
+                                        # executing its AI:
+                                        enemy_passed_turn_boolean = True
+
+                                        input("Press enter to continue to the next character in the initiative queue.")
+                                        print("")
+
+                                        # Advance cur_char:
+                                        prev_cur_combat_char_index = combat_initiative_list.index(attacking_char)
+
+                                        cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(
+                                            cur_combat_char,
+                                            combat_initiative_list,
+                                            cur_combat_room_id,
+                                            cur_combat_round,
+                                            prev_cur_combat_char_index,
+                                            f"DEBUG: Moving away from EXECUTE_ACTION game_state: cur_char {cur_combat_char.name} for enemy or neutral AI: RANGED_PREFERENCE: nearest_target_list) <= 0, which means all applicable targets are downed and unconscious.")
 
                                 #Melee attack them:
                                 elif dist_between_target == ideal_abil_range:
@@ -1649,8 +1910,8 @@ if __name__ == '__main__':
 
                                     # Targeted rank has already been set, just move to fight:
                                     attacking_char.enemy_ai_fight_boolean = True
-                                    print(
-                                        f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target == {dist_between_target}, which is the same as their ideal_target_range of: {ideal_abil_range}--so they have decided to attack.")
+                                    #print(
+                                        #f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target == {dist_between_target}, which is the same as their ideal_target_range of: {ideal_abil_range}--so they have decided to attack.")
 
                             #Unable to build nearest target list: this means all applicable targets were unconscious:
                             elif len(nearest_target_list) <= 0:
@@ -1725,80 +1986,90 @@ if __name__ == '__main__':
                                 #Define our nearest pc rank as our target rank:
                                 attacking_char.targeted_rank = nearest_target_list[0].cur_combat_rank
 
-                                print(
-                                    f"Debug: Enemy AI: {attacking_char.name} determined that the rank {attacking_char.targeted_rank} was the rank in which the closest pc to them resides."
-                                    f"Their enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
+                                #print(
+                                    #f"Debug: Enemy AI: {attacking_char.name} determined that the rank {attacking_char.targeted_rank} was the rank in which the closest pc to them resides."
+                                    #f"Their enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
 
                                 #Calculate dist between cur_rank and the rank we've targeted:
                                 dist_between_target = return_distance_between_ranks(attacking_char.targeted_rank,attacking_char.cur_combat_rank)
-                                print(
-                                    f"Debug: Enemy AI: {attacking_char.name} the distance between them (their current rank = {attacking_char.cur_combat_rank}) and their chosen rank was: {dist_between_target}.")
+                                #print(
+                                    #f"Debug: Enemy AI: {attacking_char.name} the distance between them (their current rank = {attacking_char.cur_combat_rank}) and their chosen rank was: {dist_between_target}.")
 
                                 #This is our ideal range - so fight
                                 if dist_between_target == ideal_abil_range:
                                     #Targeted rank has already been set, just move to fight:
                                     attacking_char.enemy_ai_fight_boolean = True
-                                    print(
-                                        f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target == {dist_between_target}, which is the same as their ideal_target_range of: {ideal_abil_range}--so they have decided to attack.")
+                                    #print(
+                                        #f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target == {dist_between_target}, which is the same as their ideal_target_range of: {ideal_abil_range}--so they have decided to attack.")
 
                                 #Target is getting close - backup to maintain our ideal range:
                                 elif dist_between_target < ideal_abil_range:
-                                    print(
-                                        f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target did NOT equal their ideal_target_range of: {ideal_abil_range}--"
-                                        f"BUT they were < than their ideal_abil_range, so they have decided to try and move north, if able, to maintain their ideal abil range.")
 
-                                    if attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
-                                        move_dir = -1
+                                    if attacking_char.suppressed_count <= 0:
+                                        #print(
+                                            #f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target did NOT equal their ideal_target_range of: {ideal_abil_range}--"
+                                            #f"BUT they were < than their ideal_abil_range, so they have decided to try and move north, if able, to maintain their ideal abil range.")
+
+                                        if attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                                            move_dir = -1
+                                        else:
+                                            move_dir = 1
+
+                                        #Determine if it can actually move in that direction:
+                                        if (attacking_char.cur_combat_rank + move_dir >= 0 and
+                                        attacking_char.cur_combat_rank + move_dir < len(combat_rank_list) and attacking_char.suppressed_count <= 0) :
+
+                                            combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
+                                                                                        attacking_char)
+
+                                            #print(f"Debug: Enemy AI: {attacking_char.name} was able to advance or withdraw to adjust their rank in relation to their nearest pc target in order to utilize their max_range. enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
+
+                                            # After advancing, build our overwatch list:
+                                            overwatch_attacker_list = build_overwatch_list(attacking_char, combat_initiative_list)
+
+                                            # Move to GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST, if applicable:
+                                            if len(overwatch_attacker_list) > 0:
+                                                cur_game_state = GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST
+                                                cur_overwatch_attacker_index = 0
+                                                overwatch_loop_mode_enabled = True
+                                                overwatch_target_id = attacking_char
+                                                print(f"**The {attacking_char.name} has been targeted for overwatch fire!**\n")
+                                                #print(f"DEBUG:Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
+                                        #Either we can't move any further in that direction or we're suppressed--either way, just attack nearest
+                                        #target because they are within our max_range:
+                                        else:
+                                            #If we can't move in any further in that direction, just choose the nearest pc rank for attack:
+                                            suppressed_debug_str = "No"
+                                            if attacking_char.suppressed_count > 0:
+                                                suppressed_debug_str = "YES, THEY ARE SUPPRESSED!"
+                                            #print(f"Debug: Enemy AI: {attacking_char.name}: Couldn't move any further north or south as they were already on the boundaries of combat_rank_list, or because they were suppressed. Are they suppressed? Answer: {suppressed_debug_str}. Their suppressed_count == {attacking_char.suppressed_count}")
+
+                                            attacking_char.enemy_ai_fight_boolean = True
+
+                                            #print(f"Debug: Enemy AI: {attacking_char.name}: Our distance between ourself and our target rank: {dist_between_target} was <= our ideal_abil_range: {ideal_abil_range}."
+                                                  #f"So we're just going to attack them.")
+
+                                            #This rewards the player by backing this enemy into a wall - at which point the enemy is forced to use a weaker
+                                            # melee attack instead; this is VERY exploitable by the player and so should only be used by certain enemy types;
+                                            # in this case: the suppressor types.
+                                            if attacking_char.ai_is_suppressor_boolean:
+                                                if attacking_char.targeted_rank == attacking_char.cur_combat_rank:
+                                                    attacking_char.chosen_weapon = attacking_char.ai_inferior_alternate_wep
+                                                    #print(f"Debug: Enemy AI: {attacking_char.name}: This ai unit with RANGED_PREFERENCE_COWARD and ai_is_suppressor_boolean ==True has been backed into a wall and targets are in its same rank (melee range); as a reward for the player, this target will now be forced to use their inferior weapon.")
+
+                                    #Attacker wants to withdraw to maintain ideal range but can't due to suppression,
+                                    #so just attack instead:
                                     else:
-                                        move_dir = 1
-
-                                    #Determine if it can actually move in that direction:
-                                    if (attacking_char.cur_combat_rank + move_dir >= 0 and
-                                    attacking_char.cur_combat_rank + move_dir < len(combat_rank_list) and attacking_char.suppressed_count <= 0) :
-
-                                        combat_rank_list = advance_or_withdraw_char(move_dir, combat_rank_list,
-                                                                                    attacking_char)
-
-                                        print(f"Debug: Enemy AI: {attacking_char.name} was able to advance or withdraw to adjust their rank in relation to their nearest pc target in order to utilize their max_range. enemy_ai_fight_boolean should still == False, it == {attacking_char.enemy_ai_fight_boolean}")
-
-                                        # After advancing, build our overwatch list:
-                                        overwatch_attacker_list = build_overwatch_list(attacking_char, combat_initiative_list)
-
-                                        # Move to GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST, if applicable:
-                                        if len(overwatch_attacker_list) > 0:
-                                            cur_game_state = GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST
-                                            cur_overwatch_attacker_index = 0
-                                            overwatch_loop_mode_enabled = True
-                                            overwatch_target_id = attacking_char
-                                            print(f"**The {attacking_char.name} has been targeted for overwatch fire!**\n")
-                                            print(f"Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
-                                    #Either we can't move any further in that direction or we're suppressed--either way, just attack nearest
-                                    #target because they are within our max_range:
-                                    else:
-                                        #If we can't move in any further in that direction, just choose the nearest pc rank for attack:
-                                        suppressed_debug_str = "No"
-                                        if attacking_char.suppressed_count > 0:
-                                            suppressed_debug_str = "YES, THEY ARE SUPPRESSED!"
-                                        print(f"Debug: Enemy AI: {attacking_char.name}: Couldn't move any further north or south as they were already on the boundaries of combat_rank_list, or because they were suppressed. Are they suppressed? Answer: {suppressed_debug_str}. Their suppressed_count == {attacking_char.suppressed_count}")
-
+                                        # Targeted rank has already been set, just move to fight:
                                         attacking_char.enemy_ai_fight_boolean = True
-
-                                        print(f"Debug: Enemy AI: {attacking_char.name}: Our distance between ourself and our target rank: {dist_between_target} was <= our ideal_abil_range: {ideal_abil_range}."
-                                              f"So we're just going to attack them.")
-
-                                        #This rewards the player by backing this enemy into a wall - at which point the enemy is forced to use a weaker
-                                        # melee attack instead; this is VERY exploitable by the player and so should only be used by certain enemy types;
-                                        # in this case: the suppressor types.
-                                        if attacking_char.ai_is_suppressor_boolean:
-                                            if attacking_char.targeted_rank == attacking_char.cur_combat_rank:
-                                                attacking_char.chosen_weapon = attacking_char.ai_inferior_alternate_wep
-                                                print(f"Debug: Enemy AI: {attacking_char.name}: This ai unit with RANGED_PREFERENCE_COWARD and ai_is_suppressor_boolean ==True has been backed into a wall and targets are in its same rank (melee range); as a reward for the player, this target will now be forced to use their inferior weapon.")
+                                        #print(
+                                            #f"Debug: Enemy AI: {attacking_char.name} the distance between them and their target == {dist_between_target}, which is < than their ideal_target_range of: {ideal_abil_range}; they would withdraw but they are supprsesed so they have decided to attack.")
 
                                 elif dist_between_target > ideal_abil_range:
                                     #We need to move closer:
-                                    print(
-                                        f"Debug: Enemy AI: {attacking_char.name}: Our distance between ourself and our target rank: {dist_between_target} was > our ideal_abil_range (our max_range): {ideal_abil_range}."
-                                        f"So we're going to move closer to them. Our suppressed_count == {attacking_char.suppressed_count}")
+                                    #print(
+                                        #f"Debug: Enemy AI: {attacking_char.name}: Our distance between ourself and our target rank: {dist_between_target} was > our ideal_abil_range (our max_range): {ideal_abil_range}."
+                                        #f"So we're going to move closer to them. Our suppressed_count == {attacking_char.suppressed_count}")
 
                                     # Target is NORTH of you - move north to move closer to it:
                                     if attacking_char.cur_combat_rank > attacking_char.targeted_rank:
@@ -1811,8 +2082,8 @@ if __name__ == '__main__':
                                     #Target is of equal distance - this case should never trigger:
                                     elif attacking_char.cur_combat_rank == attacking_char.targeted_rank:
                                         #This technically should never be the case, because otherwise dist_between_target <= ideal_abil_range would have triggered
-                                        print(f"Debug: For enemy ai with name of: {attacking_char.name}: something really odd happened, dist_between_target was greater than ideal_abil_range, but enemy was also in the same rank as the targeted_rank. Investigate.")
-
+                                        #print(f"Debug: For enemy ai with name of: {attacking_char.name}: something really odd happened, dist_between_target was greater than ideal_abil_range, but enemy was also in the same rank as the targeted_rank. Investigate.")
+                                        pass
                                     #Move, if this attacker is not suppressed:
                                     if attacking_char.suppressed_count <= 0:
                                         #Advance or withdraw to get closer to our target rank:
@@ -1828,18 +2099,19 @@ if __name__ == '__main__':
                                             cur_overwatch_attacker_index = 0
                                             overwatch_loop_mode_enabled = True
                                             overwatch_target_id = attacking_char
-                                            print(f"Debug: {attacking_char.name} has been targeted for overwatch fire!\n")
-                                            print(
-                                                f"Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
+                                            print(f"*{attacking_char.name} has been targeted for overwatch fire!*\n")
+                                            #print(
+                                                #f"DEBUG: Their index position in the combat_initiative_list == {combat_initiative_list.index(attacking_char)}.")
                                     else:
                                         #Print suppressed string
-                                        print(f"*{attacking_char.name} wants to advance but are unable to--they've been suppressed!*\n")
+                                        print(f"{attacking_char.name} wants to advance, but can't find an opening. They've been suppressed by enemy fire!\n")
 
                                         # Set var so the next enemy instance doesn't just instantly move to FIGHT code without
                                         # executing its AI:
                                         enemy_passed_turn_boolean = True
 
                                         continue_key = input("Press enter to continue to the next character in the initiative queue.")
+                                        print("")
 
                                         # Advance cur_char:
                                         prev_cur_combat_char_index = combat_initiative_list.index(attacking_char)
@@ -1917,6 +2189,13 @@ if __name__ == '__main__':
                             filtered_enemy_list.append(overwatch_target_id)
                             enemies_to_target = 1
 
+                        #Manually define vars we'll need to not break the iteration code:
+                        if pc_fleeing_combat_boolean:
+                            filtered_enemy_list = -1
+                            filtered_enemy_list = []
+                            filtered_enemy_list.append(fleeing_pc_id)
+                            enemies_to_target = 1
+
                         #Move into iteration code:
                         if len(filtered_enemy_list) > 0:
 
@@ -1929,6 +2208,7 @@ if __name__ == '__main__':
                                         sufficient_ammo_boolean = False
                                     else:
                                         if attempting_suppress_boolean:
+                                            attacking_char.chosen_weapon.status_effect_list[ENUM_STATUS_EFFECT_SUPPRESSED] = 100
                                             ammo_total -= 2
                                         else:
                                             ammo_total -= 1
@@ -1954,10 +2234,10 @@ if __name__ == '__main__':
                                             attacker_accuracy -= ENUM_SUPPRESSIVE_FIRE_ACCURACY_DEBUFF
                                         #Apply to_hit bonus if under the effects of adrenal pen:
                                         if attacking_char.adrenal_pen_count > 0:
-                                            attacker_accuracy += 2
+                                            attacker_accuracy += ENUM_ADRENAL_PEN_BONUS
                                         #Ogre melee character gets slight to_hit bonus with melee weapons
                                         if attacking_char.char_type_enum == ENUM_CHARACTER_OGRE and attacking_char.chosen_weapon.max_range == 0:
-                                            attacker_accuracy += 1
+                                            attacker_accuracy += ENUM_OGRE_MELEE_ACC_BONUS
                                         #Define defender evasion and armor:
                                         defender_evasion = defending_char.evasion
                                         defender_armor = defending_char.armor
@@ -1966,11 +2246,11 @@ if __name__ == '__main__':
                                             defender_evasion += 1
                                         #Apply 'shield bonus':
                                         if defending_char.shield_bonus_count > 0:
-                                            defender_evasion += 2
-                                            defender_armor += 2
+                                            defender_evasion += ENUM_PERSONAL_SHIELD_BONUS
+                                            defender_armor += ENUM_PERSONAL_SHIELD_BONUS
                                         #Apply 'hold the line' bonus:
                                         if defending_char.hold_the_line_count > 0:
-                                            defender_evasion += 2
+                                            defender_evasion += ENUM_HOLD_THE_LINE_EVADE_BONUS
                                         #Apply 'suppressed' malus:
                                         if defending_char.suppressed_count > 0:
                                             defender_evasion -= ENUM_SUPPRESSED_EVASION_DEBUFF
@@ -1997,7 +2277,7 @@ if __name__ == '__main__':
                                             dmg_roll = random.randint(attacking_char.chosen_weapon.dmg_min,attacking_char.chosen_weapon.dmg_max)
                                             #Add extra damage if Cragos is attacking in melee:
                                             if attacking_char.char_type_enum == ENUM_CHARACTER_OGRE and attacking_char.chosen_weapon.max_range == 0:
-                                                dmg_roll += random.randint(1,3)
+                                                dmg_roll += random.randint(1,ENUM_OGRE_MELEE_DMG_BONUS)
                                             #Cap total damage at no less than 0:
                                             total_dmg = max(0,dmg_roll-defender_armor)
                                             #Check death, reduce hp, check status effects, etc:
@@ -2012,7 +2292,33 @@ if __name__ == '__main__':
                                                         defending_char.unconscious_boolean = True
                                                         defending_char.unconscious_count = ENUM_BASE_UNCONSCIOUS_COUNT
                                                     else:
-                                                        print(f"{defending_char.name} has been killed!\n")
+                                                        if (defending_char.char_type_enum >= ENUM_CHARACTER_NEUTRAL_JITTERING_BUZZSAW and
+                                                        defending_char.char_type_enum <= ENUM_CHARACTER_NEUTRAL_LIGHT_SENTRY_DRONE):
+                                                            print(f"{defending_char.name} has been destroyed!\n")
+                                                        else:
+                                                            print(f"{defending_char.name} has been killed!\n")
+                                                            #Spawn skittering larva, if able:
+                                                            if defending_char.char_type_enum == ENUM_CHARACTER_ENEMY_LUMBERING_MAULER and defending_char.spawn_minion_count > 0:
+                                                                # Spawn a certain number of skittering larva:
+                                                                for i in range(0, defending_char.spawn_minion_count):
+                                                                    minion_inst = Character(
+                                                                        ENUM_CHARACTER_ENEMY_SKITTERING_LARVA,
+                                                                        defending_char.cur_grid_x,
+                                                                        defending_char.cur_grid_y,
+                                                                        defending_char.cur_grid,
+                                                                        ENUM_CHAR_TEAM_ENEMY, True)
+                                                                    # Add to end of initiative_queue and to attacker's current rank in combat_rank_list
+                                                                    combat_initiative_list.append(minion_inst)
+                                                                    combat_rank_list[
+                                                                        defending_char.cur_combat_rank].append(
+                                                                        minion_inst)
+                                                                    minion_inst.cur_combat_rank = defending_char.cur_combat_rank
+                                                                    # Print result:
+                                                                    print(
+                                                                        f"While in its death throes, a {minion_inst.name} has just violently spawned from the {defending_char.name}'s back!\n")
+
+                                                                defending_char.spawn_minion_count = 0
+
                                                     defender_killed_boolean = True
                                                     if overwatch_loop_mode_enabled:
                                                         #Important! We need to change this prev_cur_combat_char_index to == the index of the defending_char
@@ -2026,7 +2332,7 @@ if __name__ == '__main__':
                                                         valid_death = False
                                                     if valid_death:
 
-                                                        print(f"Debug: before entering destroy_combatant_inst: the defending_char's index in combat_initiative_list is : {combat_initiative_list.index(defending_char)}.")
+                                                        #print(f"Debug: before entering destroy_combatant_inst: the defending_char's index in combat_initiative_list is : {combat_initiative_list.index(defending_char)}.")
 
                                                         combat_rank_list, combat_initiative_list, pc_char_list,enemy_char_list,neutral_char_list = destroy_combatant_inst(combat_rank_list,
                                                                                                                                                combat_initiative_list,
@@ -2036,6 +2342,7 @@ if __name__ == '__main__':
                                                 #If they've been hit, taken damage > 0 AND haven't been killed - apply status effects:
                                                 if not defender_killed_boolean:
                                                     apply_status_effects(defending_char,attacking_char.chosen_weapon)
+
                                             #Print damage absorption - still check for status effect, if item allows it:
                                             else:
                                                 print(f"The {defending_char.name} has been {attacking_char.chosen_weapon.item_dmg_str} for {dmg_roll} damage - but their armor fully absorbed the damage!\n")
@@ -2045,17 +2352,22 @@ if __name__ == '__main__':
                                                     apply_status_effects(defending_char, attacking_char.chosen_weapon)
                                         #Print miss message:
                                         else:
-                                            print(
-                                                f"{attacking_char.name} misses the {defending_char.name} with their attack!\n")
+                                            if attacking_char.char_team_enum == ENUM_CHAR_TEAM_ENEMY:
+                                                print(
+                                                    f"{attacking_char.name} misses {defending_char.name} with their attack!\n")
+                                            else:
+                                                print(
+                                                    f"{attacking_char.name} misses the {defending_char.name} with their attack!\n")
                                     else:
-                                        print("debug only: filtered_list is empty, last enemy instance in this rank deleted.")
+                                        #print("debug only: filtered_list is empty, last enemy instance in this rank deleted.")
                                         break
                                 else:
                                     print(f"The {attacking_char.chosen_weapon.item_name} jammed! {attacking_char.name} is out of ammo!\n")
                                     break
                         else:
                             #This shouldn't conceivably happen, as we check for it in enemy ai.
-                            print(f"Debug: Error: {attacking_char.name} couldn't find any targets; its filtered_enemy_list len == 0.")
+                            #print(f"Debug: Error: {attacking_char.name} couldn't find any targets; its filtered_enemy_list len == 0.")
+                            pass
 
                     #endregion
 
@@ -2075,8 +2387,30 @@ if __name__ == '__main__':
                             #Set attribute == -1 (remove it from memory)
                             attacking_char.chosen_weapon = -1
 
+                    #In any case, the attacking_char has had a chance to do something-now their is_opportunity_attacker_boolean
+                    #must be reset:
+                    attacking_char.is_opportunity_attacker_boolean = False
+
+                    # Reset suppress:
+                    if attempting_suppress_boolean and isinstance(attacking_char.chosen_weapon,Item):
+                        attacking_char.chosen_weapon.status_effect_list[ENUM_STATUS_EFFECT_SUPPRESSED] = 0
+                        print(f"For attacking char: {attacking_char.name}, their item: {attacking_char.chosen_weapon.item_name} had its status_effect_list[suppress_enum] reset to 0.")
+
                     #Advance cur_combat_char (and possibly cur_combat_round), but only if we're not in overwatch loop mode:
                     if not overwatch_loop_mode_enabled:
+
+                        #Execute 'flee' for character:
+                        if (pc_fleeing_combat_boolean and defending_char.unconscious_boolean == False and defending_char.hp_cur > 0
+                        and defending_char.completely_dead_boolean == False):
+                            #Reset:
+                            pc_fleeing_combat_boolean = False
+                            #Assign index before it's removed:
+                            prev_cur_combat_char_index = combat_initiative_list.index(defending_char)
+                            #Flee
+                            execute_char_combat_flee(combat_initiative_list, combat_rank_list, cur_combat_room_id,
+                                                     fleeing_pc_id, False)
+
+                        #Advance cur char:
                         cur_combat_char, cur_combat_round, cur_game_state, combat_initiative_list = advance_combat_cur_char(cur_combat_char,
                                                                                                                             combat_initiative_list,
                                                                                                                             cur_combat_room_id,
@@ -2085,11 +2419,15 @@ if __name__ == '__main__':
                                                                                                                             f"Moving away from EXECUTE_ACTION game state for cur_combat_char: {cur_combat_char.name}, combat FIGHT just finished executing and overwatch_loop mode == FALSE.")
                         #EOF
 
+                    #pc has by now either fled or been killed; either way, reset this var:
+                    pc_fleeing_combat_boolean = False
+
                     #Check to see if combat needs to end:
                     combat_concluded_boolean, enemies_won_boolean = check_combat_end_condition(cur_combat_room_id)
 
                     if combat_concluded_boolean:
-                        if not enemies_won_boolean:
+                        overwatch_loop_mode_enabled = False #Always reset
+                        if enemies_won_boolean == False:
                             prematurely_end_overwatch_mode = True
                             #Reset, clear our combat lists:
                             combat_initiative_list = -1
@@ -2104,6 +2442,7 @@ if __name__ == '__main__':
                             continue_key = input("The battle is over! Every enemy has fled or been slain. Press enter to continue.")
                             print("")
                         elif enemies_won_boolean:
+                            remove_team_chars_from_room(cur_combat_room_id, ENUM_CHAR_TEAM_NEUTRAL)
                             print(
                                 "The battle is over! The enemies in this room cavort and slaver in the wake of their victory...\n")
                             if len(pc_char_list) <= 0:
@@ -2154,7 +2493,7 @@ if __name__ == '__main__':
 
                                 #Await player input:
                                 continue_str = input(
-                                    "Press enter to continue to the next combatant in the initiative queue.\n")
+                                    "Press enter to continue to the next combatant in the initiative queue.")
                                 print("")
 
                             #Move back to game_state ITERATE OVERWATCH
@@ -2185,12 +2524,12 @@ if __name__ == '__main__':
                             overwatch_attacker_list = -1
 
                             #Await player input:
-                            continue_str = input("Press enter to continue to the next combatant in the initiative queue.\n")
+                            continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
                             print("")
 
                         #Pause for player input; overwatch_loop is not in effect and game_state has already advanced with advanced_combat_char()
                         else:
-                            continue_str = input("Press enter to continue to the next combatant in the initiative queue.\n")
+                            continue_str = input("Press enter to continue to the next combatant in the initiative queue.")
                             print("")
 
         # endregion
@@ -2201,7 +2540,7 @@ if __name__ == '__main__':
             #Define overwatch_attacker_id
             overwatch_attacker_id = overwatch_attacker_list[cur_overwatch_attacker_index]
 
-            print(f"Debug: cur_game_state == GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST: overwatch_attacker_id.name == {overwatch_attacker_id.name}, overwatch_target_id.name == {overwatch_target_id.name}. \n Moving into EXECUTE_COMBAT now.")
+            #print(f"Debug: cur_game_state == GAME_STATE_COMBAT_ITERATE_OVERWATCH_LIST: overwatch_attacker_id.name == {overwatch_attacker_id.name}, overwatch_target_id.name == {overwatch_target_id.name}. \n Moving into EXECUTE_COMBAT now.")
 
             cur_game_state = GAME_STATE_COMBAT_EXECUTE_ACTION
 
@@ -2690,7 +3029,7 @@ if __name__ == '__main__':
                                                 f"DEBUG: Moving away from USE ABILITY ON PC TARGET, game_state == {cur_game_state}, cur_char {cur_combat_char.name} .")
 
                                             continue_str = input(
-                                                "Press enter to continue to the next combatant in the initiative queue.\n")
+                                                "Press enter to continue to the next combatant in the initiative queue.")
                                             print("")
                                         else:
                                             #Return to assign combat command:
